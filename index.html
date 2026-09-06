@@ -248,6 +248,7 @@
 <body>
 
 <div class="container">
+    <!-- LOGIN -->
     <div id="loginScreen" class="login-box">
         <h1>KVG ADMIN</h1>
         <p class="subtitle">Restricted Access</p>
@@ -259,11 +260,13 @@
         </div>
     </div>
 
+    <!-- ADMIN PANEL -->
     <div id="adminPanel">
         <a href="index.html" class="back-link">← Back to site</a>
         <h1>KVG Admin</h1>
         <p class="subtitle">Control panel · changes apply live</p>
 
+        <!-- SITE NAME / BRANDING -->
         <div class="card">
             <h2>◈ Website Name & Branding</h2>
             <label>Full Site Name (browser tab)</label>
@@ -300,6 +303,7 @@
             <div id="brandStatus" class="status"></div>
         </div>
 
+        <!-- MAINTENANCE / SHUTDOWN -->
         <div class="card">
             <h2>◈ Shutdown / Maintenance Mode</h2>
             <div class="toggle-row">
@@ -322,6 +326,7 @@
             <div id="maintStatus" class="status"></div>
         </div>
 
+        <!-- TIMERS / COUNTDOWNS -->
         <div class="card">
             <h2>◈ Active Timers / Countdowns</h2>
             <div id="timersList"></div>
@@ -340,6 +345,37 @@
             <div id="timerStatus" class="status"></div>
         </div>
 
+        <!-- GLOBAL ANNOUNCEMENT -->
+        <div class="card">
+            <h2>◈ Global Announcement</h2>
+            <div class="toggle-row">
+                <span class="toggle-label">Show announcement banner</span>
+                <label class="switch">
+                    <input type="checkbox" id="cfgAnnouncementEnabled">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <label>Announcement Message</label>
+            <textarea id="cfgAnnouncementMsg" placeholder="e.g. New games added! Check the downloadable tab."></textarea>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="saveAnnouncement()">Save Announcement</button>
+            </div>
+            <div id="announceStatus" class="status"></div>
+        </div>
+
+        <!-- GLOBAL REFRESH -->
+        <div class="card">
+            <h2>◈ Global Refresh</h2>
+            <p style="font-size:0.85rem; color:var(--muted); margin-bottom:14px; line-height:1.5;">
+                Force every visitor currently on the site to instantly reload the page. Useful after big updates.
+            </p>
+            <div class="btn-group">
+                <button class="btn btn-danger" onclick="forceGlobalRefresh()">Force Global Refresh Now</button>
+            </div>
+            <div id="refreshStatus" class="status"></div>
+        </div>
+
+        <!-- QUICK ACTIONS -->
         <div class="card">
             <h2>◈ Quick Actions</h2>
             <div class="btn-group">
@@ -370,7 +406,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const ADMIN_PASSWORD = "kvgadmin2025";
+    const ADMIN_PASSWORD = "3717";
 
     window.tryLogin = function() {
         const pass = document.getElementById('adminPass').value;
@@ -405,6 +441,8 @@
             document.getElementById('cfgMaintenance').checked = !!cfg.maintenance;
             document.getElementById('cfgMaintTitle').value = cfg.maintenanceTitle || "SITE OFFLINE";
             document.getElementById('cfgMaintMsg').value = cfg.maintenanceMsg || "This platform is temporarily shut down. Please check back later.";
+            document.getElementById('cfgAnnouncementEnabled').checked = !!cfg.announcementEnabled;
+            document.getElementById('cfgAnnouncementMsg').value = cfg.announcementMsg || "";
         }, { onlyOnce: true });
     }
 
@@ -434,6 +472,30 @@
             showStatus('maintStatus', "Maintenance settings saved — live now");
         } catch (e) {
             showStatus('maintStatus', "Error: " + e.message, false);
+        }
+    };
+
+    window.saveAnnouncement = async function() {
+        try {
+            await update(ref(db, 'siteConfig'), {
+                announcementEnabled: document.getElementById('cfgAnnouncementEnabled').checked,
+                announcementMsg: document.getElementById('cfgAnnouncementMsg').value.trim()
+            });
+            showStatus('announceStatus', "Announcement saved — live on site now");
+        } catch (e) {
+            showStatus('announceStatus', "Error: " + e.message, false);
+        }
+    };
+
+    window.forceGlobalRefresh = async function() {
+        if (!confirm("Force every visitor to reload the page right now?")) return;
+        try {
+            await update(ref(db, 'siteConfig'), {
+                refreshToken: Date.now()
+            });
+            showStatus('refreshStatus', "Global refresh triggered — all open tabs will reload");
+        } catch (e) {
+            showStatus('refreshStatus', "Error: " + e.message, false);
         }
     };
 
