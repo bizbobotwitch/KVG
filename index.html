@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KVG Admin Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Syne:wght@400;600;800&family=Space+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon: #00ff88;
+            --ice: #00b4ff;
+            --hot: #ff3a6e;
+            --gold: #ffd700;
+            --void: #04040a;
+            --deep: #0a0a14;
+            --glass: rgba(255,255,255,0.04);
+            --glass-border: rgba(255,255,255,0.08);
+            --text: #e8e8f0;
+            --muted: #666680;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Syne', sans-serif;
+            background: var(--void);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px);
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.6rem;
+            color: var(--neon);
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            text-shadow: 0 0 20px rgba(0,255,136,0.4);
+        }
+
+        .subtitle {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.85rem;
+            color: var(--ice);
+            letter-spacing: 2px;
+            margin-bottom: 18px;
+            text-transform: uppercase;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-bottom: 6px;
+            letter-spacing: 1px;
+        }
+
+        input[type="text"],
+        input[type="datetime-local"],
+        textarea {
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(0,0,0,0.45);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: white;
+            font-family: 'Syne', sans-serif;
+            font-size: 0.95rem;
+            margin-bottom: 14px;
+            transition: 0.25s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--neon);
+            box-shadow: 0 0 0 3px rgba(0,255,136,0.1);
+        }
+
+        textarea { min-height: 80px; resize: vertical; }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 22px;
+            border-radius: 10px;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            border: none;
+            transition: 0.25s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--neon), #00cc70);
+            color: #000;
+        }
+        .btn-primary:hover { transform: scale(1.03); box-shadow: 0 6px 20px rgba(0,255,136,0.35); }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--hot), #cc2a55);
+            color: #fff;
+        }
+        .btn-danger:hover { transform: scale(1.03); box-shadow: 0 6px 20px rgba(255,58,110,0.35); }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--text);
+        }
+        .btn-secondary:hover { border-color: var(--ice); color: var(--ice); }
+
+        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+
+        .status {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            margin-top: 12px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            display: none;
+        }
+        .status.ok { display: block; background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); color: var(--neon); }
+        .status.err { display: block; background: rgba(255,58,110,0.1); border: 1px solid rgba(255,58,110,0.3); color: var(--hot); }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding: 12px 14px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .toggle-label { font-size: 0.9rem; }
+
+        .switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; inset: 0;
+            background: #333;
+            border-radius: 26px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .slider:before {
+            content: '';
+            position: absolute;
+            height: 20px; width: 20px;
+            left: 3px; bottom: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+        input:checked + .slider { background: var(--hot); }
+        input:checked + .slider:before { transform: translateX(24px); }
+
+        .timer-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 14px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        .timer-item .info { flex: 1; }
+        .timer-item .title { font-family: 'Orbitron'; font-size: 0.85rem; }
+        .timer-item .date { font-family: 'Space Mono'; font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+
+        .login-box {
+            max-width: 380px;
+            margin: 80px auto;
+            text-align: center;
+        }
+        .login-box input {
+            text-align: center;
+            letter-spacing: 3px;
+        }
+
+        #adminPanel { display: none; }
+        #loginScreen { display: block; }
+
+        a.back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: var(--muted);
+            font-size: 0.8rem;
+            text-decoration: none;
+            font-family: 'Space Mono', monospace;
+        }
+        a.back-link:hover { color: var(--neon); }
+
+        @media (max-width: 600px) {
+            .row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="loginScreen" class="login-box">
+        <h1>KVG ADMIN</h1>
+        <p class="subtitle">Restricted Access</p>
+        <div class="card">
+            <label>Password</label>
+            <input type="password" id="adminPass" placeholder="••••••••" onkeydown="if(event.key==='Enter') tryLogin()">
+            <button class="btn btn-primary" style="width:100%; margin-top:8px;" onclick="tryLogin()">Enter</button>
+            <div id="loginStatus" class="status"></div>
+        </div>
+    </div>
+
+    <div id="adminPanel">
+        <a href="index.html" class="back-link">← Back to site</a>
+        <h1>KVG Admin</h1>
+        <p class="subtitle">Control panel · changes apply live</p>
+
+        <div class="card">
+            <h2>◈ Website Name & Branding</h2>
+            <label>Full Site Name (browser tab)</label>
+            <input type="text" id="cfgSiteName" placeholder="Keith Valley Games">
+
+            <div class="row">
+                <div>
+                    <label>Logo Text (top bar)</label>
+                    <input type="text" id="cfgLogoText" placeholder="KVG ◈">
+                </div>
+                <div>
+                    <label>Footer Year</label>
+                    <input type="text" id="cfgFooterYear" placeholder="2025">
+                </div>
+            </div>
+
+            <div class="row">
+                <div>
+                    <label>Hero Line 1</label>
+                    <input type="text" id="cfgHeroLine1" placeholder="Keith Valley">
+                </div>
+                <div>
+                    <label>Hero Line 2</label>
+                    <input type="text" id="cfgHeroLine2" placeholder="Games">
+                </div>
+            </div>
+
+            <label>Hero Eyebrow (small text above title)</label>
+            <input type="text" id="cfgHeroEyebrow" placeholder="Est. by Bizbobotwitch">
+
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="saveBranding()">Save Branding</button>
+            </div>
+            <div id="brandStatus" class="status"></div>
+        </div>
+
+        <div class="card">
+            <h2>◈ Shutdown / Maintenance Mode</h2>
+            <div class="toggle-row">
+                <span class="toggle-label">Site Offline (maintenance mode)</span>
+                <label class="switch">
+                    <input type="checkbox" id="cfgMaintenance">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <label>Maintenance Title</label>
+            <input type="text" id="cfgMaintTitle" placeholder="SITE OFFLINE">
+
+            <label>Maintenance Message</label>
+            <textarea id="cfgMaintMsg" placeholder="This platform is temporarily shut down. Please check back later."></textarea>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="saveMaintenance()">Save Maintenance Settings</button>
+            </div>
+            <div id="maintStatus" class="status"></div>
+        </div>
+
+        <div class="card">
+            <h2>◈ Active Timers / Countdowns</h2>
+            <div id="timersList"></div>
+
+            <hr style="border:none; border-top:1px solid var(--glass-border); margin:18px 0;">
+
+            <label>New Timer Title</label>
+            <input type="text" id="newTimerTitle" placeholder="e.g. New Game Drop">
+
+            <label>Target Date & Time</label>
+            <input type="datetime-local" id="newTimerDate">
+
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="addTimer()">Add Timer</button>
+            </div>
+            <div id="timerStatus" class="status"></div>
+        </div>
+
+        <div class="card">
+            <h2>◈ Quick Actions</h2>
+            <div class="btn-group">
+                <button class="btn btn-danger" onclick="forceShutdown()">Force Shutdown Now</button>
+                <button class="btn btn-secondary" onclick="clearAllTimers()">Clear All Timers</button>
+                <button class="btn btn-secondary" onclick="resetBranding()">Reset Branding to Default</button>
+            </div>
+            <div id="quickStatus" class="status"></div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getDatabase, ref, onValue, set, update, remove, push } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDVguqqS3Izk_p64ECsc4lig8V639VtFeA",
+      authDomain: "online-game-8b909.firebaseapp.com",
+      databaseURL: "https://online-game-8b909-default-rtdb.firebaseio.com",
+      projectId: "online-game-8b909",
+      storageBucket: "online-game-8b909.firebasestorage.app",
+      messagingSenderId: "873455266314",
+      appId: "1:873455266314:web:bc5c628faf3829fc68cdf3",
+      measurementId: "G-E91K9XC939"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const ADMIN_PASSWORD = "kvgadmin2025";
+
+    window.tryLogin = function() {
+        const pass = document.getElementById('adminPass').value;
+        const status = document.getElementById('loginStatus');
+        if (pass === ADMIN_PASSWORD) {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+            loadConfig();
+            loadTimers();
+        } else {
+            status.textContent = "Wrong password";
+            status.className = "status err";
+        }
+    };
+
+    function showStatus(id, msg, ok = true) {
+        const el = document.getElementById(id);
+        el.textContent = msg;
+        el.className = "status " + (ok ? "ok" : "err");
+        setTimeout(() => { el.className = "status"; }, 3500);
+    }
+
+    function loadConfig() {
+        onValue(ref(db, 'siteConfig'), (snap) => {
+            const cfg = snap.val() || {};
+            document.getElementById('cfgSiteName').value = cfg.siteName || "Keith Valley Games";
+            document.getElementById('cfgLogoText').value = cfg.logoText || "KVG ◈";
+            document.getElementById('cfgFooterYear').value = cfg.footerYear || "2025";
+            document.getElementById('cfgHeroLine1').value = cfg.heroLine1 || "Keith Valley";
+            document.getElementById('cfgHeroLine2').value = cfg.heroLine2 || "Games";
+            document.getElementById('cfgHeroEyebrow').value = cfg.heroEyebrow || "Est. by Bizbobotwitch";
+            document.getElementById('cfgMaintenance').checked = !!cfg.maintenance;
+            document.getElementById('cfgMaintTitle').value = cfg.maintenanceTitle || "SITE OFFLINE";
+            document.getElementById('cfgMaintMsg').value = cfg.maintenanceMsg || "This platform is temporarily shut down. Please check back later.";
+        }, { onlyOnce: true });
+    }
+
+    window.saveBranding = async function() {
+        try {
+            await update(ref(db, 'siteConfig'), {
+                siteName: document.getElementById('cfgSiteName').value.trim() || "Keith Valley Games",
+                logoText: document.getElementById('cfgLogoText').value.trim() || "KVG ◈",
+                footerYear: document.getElementById('cfgFooterYear').value.trim() || "2025",
+                heroLine1: document.getElementById('cfgHeroLine1').value.trim() || "Keith Valley",
+                heroLine2: document.getElementById('cfgHeroLine2').value.trim() || "Games",
+                heroEyebrow: document.getElementById('cfgHeroEyebrow').value.trim() || "Est. by Bizbobotwitch"
+            });
+            showStatus('brandStatus', "Branding saved — live on site now");
+        } catch (e) {
+            showStatus('brandStatus', "Error: " + e.message, false);
+        }
+    };
+
+    window.saveMaintenance = async function() {
+        try {
+            await update(ref(db, 'siteConfig'), {
+                maintenance: document.getElementById('cfgMaintenance').checked,
+                maintenanceTitle: document.getElementById('cfgMaintTitle').value.trim() || "SITE OFFLINE",
+                maintenanceMsg: document.getElementById('cfgMaintMsg').value.trim() || "This platform is temporarily shut down. Please check back later."
+            });
+            showStatus('maintStatus', "Maintenance settings saved — live now");
+        } catch (e) {
+            showStatus('maintStatus', "Error: " + e.message, false);
+        }
+    };
+
+    window.forceShutdown = async function() {
+        document.getElementById('cfgMaintenance').checked = true;
+        await saveMaintenance();
+        showStatus('quickStatus', "Site is now offline");
+    };
+
+    window.resetBranding = async function() {
+        try {
+            await update(ref(db, 'siteConfig'), {
+                siteName: "Keith Valley Games",
+                logoText: "KVG ◈",
+                footerYear: "2025",
+                heroLine1: "Keith Valley",
+                heroLine2: "Games",
+                heroEyebrow: "Est. by Bizbobotwitch"
+            });
+            loadConfig();
+            showStatus('quickStatus', "Branding reset to defaults");
+        } catch (e) {
+            showStatus('quickStatus', "Error: " + e.message, false);
+        }
+    };
+
+    let timersData = {};
+
+    function loadTimers() {
+        onValue(ref(db, 'timers'), (snap) => {
+            timersData = snap.val() || {};
+            renderTimersList();
+        });
+    }
+
+    function renderTimersList() {
+        const list = document.getElementById('timersList');
+        const keys = Object.keys(timersData);
+        if (keys.length === 0) {
+            list.innerHTML = '<p style="color:var(--muted); font-size:0.85rem; margin-bottom:10px;">No active timers.</p>';
+            return;
+        }
+        list.innerHTML = keys.map(key => {
+            const t = timersData[key];
+            const dateStr = t.targetDate ? new Date(t.targetDate).toLocaleString() : "—";
+            return `
+            <div class="timer-item">
+                <div class="info">
+                    <div class="title">${t.title || "Untitled"}</div>
+                    <div class="date">${dateStr}</div>
+                </div>
+                <button class="btn btn-danger" style="padding:8px 14px; font-size:0.65rem;" onclick="deleteTimer('${key}')">Delete</button>
+            </div>`;
+        }).join('');
+    }
+
+    window.addTimer = async function() {
+        const title = document.getElementById('newTimerTitle').value.trim();
+        const dateVal = document.getElementById('newTimerDate').value;
+        if (!title || !dateVal) {
+            showStatus('timerStatus', "Title and date required", false);
+            return;
+        }
+        try {
+            const iso = new Date(dateVal).toISOString();
+            await push(ref(db, 'timers'), { title, targetDate: iso });
+            document.getElementById('newTimerTitle').value = '';
+            document.getElementById('newTimerDate').value = '';
+            showStatus('timerStatus', "Timer added");
+        } catch (e) {
+            showStatus('timerStatus', "Error: " + e.message, false);
+        }
+    };
+
+    window.deleteTimer = async function(key) {
+        try {
+            await remove(ref(db, 'timers/' + key));
+            showStatus('timerStatus', "Timer deleted");
+        } catch (e) {
+            showStatus('timerStatus', "Error: " + e.message, false);
+        }
+    };
+
+    window.clearAllTimers = async function() {
+        if (!confirm("Delete ALL timers?")) return;
+        try {
+            await set(ref(db, 'timers'), null);
+            showStatus('quickStatus', "All timers cleared");
+        } catch (e) {
+            showStatus('quickStatus', "Error: " + e.message, false);
+        }
+    };
+</script>
+</body>
+</html>
