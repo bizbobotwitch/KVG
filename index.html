@@ -394,6 +394,39 @@
             <div id="refreshStatus" class="status"></div>
         </div>
 
+        <!-- EXTRAS -->
+        <div class="card">
+            <h2>◈ Featured / New / Colors / Tip</h2>
+            <label>Featured Game (exact title)</label>
+            <input type="text" id="cfgFeaturedGame" placeholder="Hollow Knight">
+            <label>New Games (comma-separated for NEW badge)</label>
+            <input type="text" id="cfgNewGames" placeholder="Game A, Game B">
+            <div class="row">
+                <div><label>Neon Color</label><input type="text" id="cfgAccentNeon" placeholder="#00ff88"></div>
+                <div><label>Ice Color</label><input type="text" id="cfgAccentIce" placeholder="#00b4ff"></div>
+            </div>
+            <label>Footer Tip</label>
+            <input type="text" id="cfgFooterTip" placeholder="Have fun out there">
+            <label>Changelog</label>
+            <textarea id="cfgChangelog" placeholder="- Added games&#10;- Fixes"></textarea>
+            <label>Announcement auto-hide (hours, 0 = never)</label>
+            <input type="text" id="cfgAnnounceHideHours" placeholder="24">
+            <div class="toggle-row">
+                <span class="toggle-label">Download bubble sound</span>
+                <label class="switch"><input type="checkbox" id="cfgBubbleSound" checked><span class="slider"></span></label>
+            </div>
+            <div class="btn-group"><button class="btn btn-primary" onclick="saveExtras()">Save Extras</button></div>
+            <div id="extrasStatus" class="status"></div>
+        </div>
+
+        <div class="card">
+            <h2>◈ Broadcast Popup</h2>
+            <label>Message shown to every visitor</label>
+            <textarea id="cfgBroadcastMsg" placeholder="Server restart in 5 min!"></textarea>
+            <div class="btn-group"><button class="btn btn-danger" onclick="sendBroadcast()">Send Broadcast Now</button></div>
+            <div id="broadcastStatus" class="status"></div>
+        </div>
+
         <!-- LIVE ACTIVITY -->
         <div class="card">
             <h2>◈ Live Activity</h2>
@@ -408,7 +441,9 @@
                 </div>
             </div>
             <h3 style="font-family:'Orbitron'; font-size:0.7rem; color:var(--muted); letter-spacing:2px; margin-bottom:10px;">RECENT DOWNLOADS</h3>
-            <div id="adminRecentDownloads" style="max-height:220px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
+            <div id="adminRecentDownloads" style="max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
+            <h3 style="font-family:'Orbitron'; font-size:0.7rem; color:var(--muted); letter-spacing:2px; margin:16px 0 10px;">ACTIVITY LOG</h3>
+            <div id="adminActivityLog" style="max-height:160px; overflow-y:auto; font-family:'Space Mono'; font-size:0.7rem; color:var(--muted);"></div>
         </div>
 
         <!-- QUICK ACTIONS -->
@@ -417,7 +452,9 @@
             <div class="btn-group">
                 <button class="btn btn-danger" onclick="forceShutdown()">Force Shutdown Now</button>
                 <button class="btn btn-secondary" onclick="clearAllTimers()">Clear All Timers</button>
-                <button class="btn btn-secondary" onclick="resetBranding()">Reset Branding to Default</button>
+                <button class="btn btn-secondary" onclick="resetBranding()">Reset Branding</button>
+                <button class="btn btn-secondary" onclick="exportDownloadsCSV()">Export Downloads CSV</button>
+                <button class="btn btn-danger" onclick="resetLiveData()">Reset Live Data</button>
             </div>
             <div id="quickStatus" class="status"></div>
         </div>
@@ -485,8 +522,72 @@
             document.getElementById('cfgMaintMsg').value = cfg.maintenanceMsg || "This platform is temporarily shut down. Please check back later.";
             document.getElementById('cfgAnnouncementEnabled').checked = !!cfg.announcementEnabled;
             document.getElementById('cfgAnnouncementMsg').value = cfg.announcementMsg || "";
+            document.getElementById('cfgFeaturedGame').value = cfg.featuredGame || "";
+            document.getElementById('cfgNewGames').value = cfg.newGames || "";
+            document.getElementById('cfgAccentNeon').value = cfg.accentNeon || "#00ff88";
+            document.getElementById('cfgAccentIce').value = cfg.accentIce || "#00b4ff";
+            document.getElementById('cfgFooterTip').value = cfg.footerTip || "";
+            document.getElementById('cfgChangelog').value = cfg.changelog || "";
+            document.getElementById('cfgAnnounceHideHours').value = cfg.announcementHideAfterHours || "";
+            document.getElementById('cfgBubbleSound').checked = cfg.bubbleSound !== false;
         }, { onlyOnce: true });
     }
+
+    window.saveExtras = async function() {
+        try {
+            await update(ref(db, 'siteConfig'), {
+                featuredGame: document.getElementById('cfgFeaturedGame').value.trim(),
+                newGames: document.getElementById('cfgNewGames').value.trim(),
+                accentNeon: document.getElementById('cfgAccentNeon').value.trim() || "#00ff88",
+                accentIce: document.getElementById('cfgAccentIce').value.trim() || "#00b4ff",
+                footerTip: document.getElementById('cfgFooterTip').value.trim(),
+                changelog: document.getElementById('cfgChangelog').value,
+                announcementHideAfterHours: document.getElementById('cfgAnnounceHideHours').value.trim() || "0",
+                bubbleSound: document.getElementById('cfgBubbleSound').checked
+            });
+            await push(ref(db, 'activityLog'), { type: 'config', title: 'Extras updated', ts: Date.now() });
+            showStatus('extrasStatus', 'Extras saved — live now');
+        } catch(e) { showStatus('extrasStatus', 'Error: '+e.message, false); }
+    };
+
+    window.sendBroadcast = async function() {
+        const msg = document.getElementById('cfgBroadcastMsg').value.trim();
+        if (!msg) { showStatus('broadcastStatus', 'Message required', false); return; }
+        try {
+            await update(ref(db, 'siteConfig'), { broadcastMsg: msg, broadcastToken: Date.now() });
+            await push(ref(db, 'activityLog'), { type: 'broadcast', title: msg.slice(0,60), ts: Date.now() });
+            showStatus('broadcastStatus', 'Broadcast sent to all visitors');
+        } catch(e) { showStatus('broadcastStatus', 'Error: '+e.message, false); }
+    };
+
+    window.exportDownloadsCSV = async function() {
+        try {
+            const snap = await new Promise(res => onValue(ref(db, 'downloads'), s => res(s), { onlyOnce: true }));
+            const data = snap.val() || {};
+            let csv = 'title,timestamp,date\n';
+            Object.values(data).forEach(d => {
+                csv += `"${(d.title||'').replace(/"/g,'""')}",${d.ts||''},"${d.ts?new Date(d.ts).toISOString():''}"\n`;
+            });
+            const blob = new Blob([csv], {type:'text/csv'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'kvg-downloads.csv';
+            a.click();
+            showStatus('quickStatus', 'CSV downloaded');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+
+    window.resetLiveData = async function() {
+        if (!confirm('Clear downloads, presence, download counts, and activity log?')) return;
+        try {
+            await set(ref(db, 'downloads'), null);
+            await set(ref(db, 'downloadCount'), 0);
+            await set(ref(db, 'gameDownloads'), null);
+            await set(ref(db, 'presence'), null);
+            await set(ref(db, 'activityLog'), null);
+            showStatus('quickStatus', 'Live data reset');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
 
     window.saveBranding = async function() {
         try {
@@ -521,7 +622,8 @@
         try {
             await update(ref(db, 'siteConfig'), {
                 announcementEnabled: document.getElementById('cfgAnnouncementEnabled').checked,
-                announcementMsg: document.getElementById('cfgAnnouncementMsg').value.trim()
+                announcementMsg: document.getElementById('cfgAnnouncementMsg').value.trim(),
+                announcementSetAt: Date.now()
             });
             showStatus('announceStatus', "Announcement saved — live on site now");
         } catch (e) {
@@ -738,6 +840,18 @@
                 spawnAdminBubble(item);
             }
             if (entries.length) adminLastDownloadKey = entries[0][0];
+        });
+
+        onValue(query(ref(db, 'activityLog'), orderByChild('ts'), limitToLast(30)), (snap) => {
+            const data = snap.val() || {};
+            const entries = Object.values(data).sort((a,b)=>(b.ts||0)-(a.ts||0));
+            const box = document.getElementById('adminActivityLog');
+            if (!box) return;
+            if (!entries.length) { box.innerHTML = 'No activity yet.'; return; }
+            box.innerHTML = entries.map(e => {
+                const t = e.ts ? new Date(e.ts).toLocaleString() : '';
+                return `<div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--glass-border);"><span style="color:var(--ice);">[${e.type||'event'}]</span> ${e.title||''} <span style="opacity:0.6;">${t}</span></div>`;
+            }).join('');
         });
     }
 
