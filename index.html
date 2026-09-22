@@ -505,8 +505,12 @@
 
         <!-- GUESTBOOK MODERATION -->
         <div class="card">
-            <h2>◈ Guestbook Moderation</h2>
+            <h2>◈ Chat Room (moderation)</h2>
+            <p style="font-size:0.8rem;color:var(--muted);margin-bottom:12px;">Live chat messages. Delete spam anytime.</p>
             <div id="guestbookAdminList" style="max-height:280px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
+            <div class="btn-group" style="margin-top:10px;">
+                <button class="btn btn-danger" onclick="clearAllChat()">Clear All Chat</button>
+            </div>
             <div id="guestbookAdminStatus" class="status"></div>
         </div>
 
@@ -669,38 +673,35 @@
             const entries = Object.entries(data).sort((a,b) => (b[1].ts||0) - (a[1].ts||0));
             const el = document.getElementById('guestbookAdminList');
             if (!entries.length) {
-                el.innerHTML = '<p style="color:var(--muted);font-size:0.85rem;">No guestbook entries.</p>';
+                el.innerHTML = '<p style="color:var(--muted);font-size:0.85rem;">No chat messages yet.</p>';
                 return;
             }
             el.innerHTML = entries.map(([key, e]) => {
-                const approved = !!e.approved;
                 const time = e.ts ? new Date(e.ts).toLocaleString() : '';
                 return `<div class="timer-item" style="flex-direction:column;align-items:stretch;gap:8px;">
                     <div>
-                        <div class="title">${(e.name||'Anon')} ${approved ? '<span style="color:var(--neon);font-size:0.65rem;">APPROVED</span>' : '<span style="color:var(--hot);font-size:0.65rem;">PENDING</span>'}</div>
+                        <div class="title">${(e.name||'Anon')}</div>
                         <div class="date">${time}</div>
                         <div style="color:var(--text);font-size:0.85rem;margin-top:4px;">${(e.msg||'')}</div>
                     </div>
                     <div class="btn-group">
-                        ${approved
-                            ? `<button class="btn btn-secondary" style="padding:6px 12px;font-size:0.65rem;" onclick="setGuestbookApproved('${key}', false)">Unapprove</button>`
-                            : `<button class="btn btn-primary" style="padding:6px 12px;font-size:0.65rem;" onclick="setGuestbookApproved('${key}', true)">Approve</button>`}
                         <button class="btn btn-danger" style="padding:6px 12px;font-size:0.65rem;" onclick="deleteGuestbook('${key}')">Delete</button>
                     </div>
                 </div>`;
             }).join('');
         });
     }
-    window.setGuestbookApproved = async function(key, approved) {
-        try {
-            await update(ref(db, 'guestbook/' + key), { approved });
-            showStatus('guestbookAdminStatus', approved ? 'Approved' : 'Unapproved');
-        } catch(e) { showStatus('guestbookAdminStatus', 'Error: '+e.message, false); }
-    };
     window.deleteGuestbook = async function(key) {
         try {
             await remove(ref(db, 'guestbook/' + key));
             showStatus('guestbookAdminStatus', 'Deleted');
+        } catch(e) { showStatus('guestbookAdminStatus', 'Error: '+e.message, false); }
+    };
+    window.clearAllChat = async function() {
+        if (!confirm('Delete all chat messages?')) return;
+        try {
+            await set(ref(db, 'guestbook'), null);
+            showStatus('guestbookAdminStatus', 'Chat cleared');
         } catch(e) { showStatus('guestbookAdminStatus', 'Error: '+e.message, false); }
     };
 
