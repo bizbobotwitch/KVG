@@ -501,6 +501,7 @@
                 <button class="btn btn-secondary" onclick="exportConfigJSON()">Export Config JSON</button>
                 <button class="btn btn-danger" onclick="resetLiveData()">Reset Live Data</button>
                 <button class="btn btn-secondary" onclick="clearAnnouncement()">Clear Announcement</button>
+                <button class="btn btn-primary" onclick="throwConfetti()">🎉 Throw Confetti</button>
             </div>
             <div id="quickStatus" class="status"></div>
             <div id="staffNoteDisplay" style="margin-top:14px;padding:12px;background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:10px;font-size:0.85rem;color:var(--gold);display:none;"></div>
@@ -719,6 +720,29 @@
             showStatus('quickStatus', 'Announcement cleared');
         } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
     };
+
+    window.throwConfetti = async function() {
+        try {
+            await update(ref(db, 'siteConfig'), { confettiToken: Date.now() });
+            // also confetti on admin page
+            for (let i = 0; i < 50; i++) {
+                const el = document.createElement('div');
+                el.style.cssText = `position:fixed;top:-10px;left:${Math.random()*100}%;width:8px;height:8px;background:${['#00ff88','#00b4ff','#ffd700','#ff3a6e','#b388ff'][i%5]};border-radius:50%;z-index:30000;pointer-events:none;animation:adminConfetti ${2+Math.random()*2}s linear forwards;`;
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 4000);
+            }
+            showStatus('quickStatus', 'Confetti thrown on all open site tabs!');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+
+    // confetti keyframes for admin
+    (function(){
+        if (document.getElementById('adminConfettiStyle')) return;
+        const st = document.createElement('style');
+        st.id = 'adminConfettiStyle';
+        st.textContent = `@keyframes adminConfetti{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}`;
+        document.head.appendChild(st);
+    })();
 
     window.exportConfigJSON = async function() {
         try {
