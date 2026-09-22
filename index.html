@@ -489,6 +489,27 @@
             <div id="adminActivityLog" style="max-height:160px; overflow-y:auto; font-family:'Space Mono'; font-size:0.7rem; color:var(--muted);"></div>
         </div>
 
+        <!-- LAUNCH COUNTDOWN -->
+        <div class="card">
+            <h2>◈ Launch Countdown</h2>
+            <label>Game name</label>
+            <input type="text" id="cfgLaunchGame" placeholder="New Game Title">
+            <label>Launch time</label>
+            <input type="datetime-local" id="cfgLaunchAt">
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="saveLaunch()">Save Launch Countdown</button>
+                <button class="btn btn-secondary" onclick="clearLaunch()">Clear</button>
+            </div>
+            <div id="launchStatus" class="status"></div>
+        </div>
+
+        <!-- GUESTBOOK MODERATION -->
+        <div class="card">
+            <h2>◈ Guestbook Moderation</h2>
+            <div id="guestbookAdminList" style="max-height:280px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
+            <div id="guestbookAdminStatus" class="status"></div>
+        </div>
+
         <!-- QUICK ACTIONS -->
         <div class="card">
             <h2>◈ Quick Actions</h2>
@@ -502,6 +523,7 @@
                 <button class="btn btn-danger" onclick="resetLiveData()">Reset Live Data</button>
                 <button class="btn btn-secondary" onclick="clearAnnouncement()">Clear Announcement</button>
                 <button class="btn btn-primary" onclick="throwConfetti()">🎉 Throw Confetti</button>
+                <button class="btn btn-secondary" onclick="simulateDownload()">Simulate Download Bubble</button>
             </div>
             <div id="quickStatus" class="status"></div>
             <div id="staffNoteDisplay" style="margin-top:14px;padding:12px;background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:10px;font-size:0.85rem;color:var(--gold);display:none;"></div>
@@ -543,6 +565,7 @@
             loadUpcoming();
             loadLiveActivity();
             loadGameList();
+            loadGuestbookAdmin();
         } else {
             status.textContent = "Wrong password";
             status.className = "status err";
@@ -597,10 +620,89 @@
             } else {
                 document.getElementById('cfgScheduledMaint').value = '';
             }
+            document.getElementById('cfgLaunchGame').value = cfg.launchGame || '';
+            if (cfg.launchAt) {
+                try {
+                    const d = new Date(cfg.launchAt);
+                    document.getElementById('cfgLaunchAt').value = new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+                } catch(e) { document.getElementById('cfgLaunchAt').value = ''; }
+            } else document.getElementById('cfgLaunchAt').value = '';
             renderPickers();
             syncGameOfDaySelect();
         }, { onlyOnce: true });
     }
+
+    window.saveLaunch = async function() {
+        try {
+            const game = document.getElementById('cfgLaunchGame').value.trim();
+            const at = document.getElementById('cfgLaunchAt').value;
+            await update(ref(db, 'siteConfig'), {
+                launchGame: game,
+                launchAt: at ? new Date(at).toISOString() : null
+            });
+            showStatus('launchStatus', 'Launch countdown saved');
+        } catch(e) { showStatus('launchStatus', 'Error: '+e.message, false); }
+    };
+    window.clearLaunch = async function() {
+        try {
+            document.getElementById('cfgLaunchGame').value = '';
+            document.getElementById('cfgLaunchAt').value = '';
+            await update(ref(db, 'siteConfig'), { launchGame: '', launchAt: null });
+            showStatus('launchStatus', 'Launch countdown cleared');
+        } catch(e) { showStatus('launchStatus', 'Error: '+e.message, false); }
+    };
+
+    window.simulateDownload = async function() {
+        try {
+            await push(ref(db, 'downloads'), {
+                title: 'Test Game (simulated)',
+                thumb: '🎮',
+                ts: Date.now()
+            });
+            showStatus('quickStatus', 'Simulated download sent — check main site bubbles');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+
+    function loadGuestbookAdmin() {
+        onValue(ref(db, 'guestbook'), (snap) => {
+            const data = snap.val() || {};
+            const entries = Object.entries(data).sort((a,b) => (b[1].ts||0) - (a[1].ts||0));
+            const el = document.getElementById('guestbookAdminList');
+            if (!entries.length) {
+                el.innerHTML = '<p style="color:var(--muted);font-size:0.85rem;">No guestbook entries.</p>';
+                return;
+            }
+            el.innerHTML = entries.map(([key, e]) => {
+                const approved = !!e.approved;
+                const time = e.ts ? new Date(e.ts).toLocaleString() : '';
+                return `<div class="timer-item" style="flex-direction:column;align-items:stretch;gap:8px;">
+                    <div>
+                        <div class="title">${(e.name||'Anon')} ${approved ? '<span style="color:var(--neon);font-size:0.65rem;">APPROVED</span>' : '<span style="color:var(--hot);font-size:0.65rem;">PENDING</span>'}</div>
+                        <div class="date">${time}</div>
+                        <div style="color:var(--text);font-size:0.85rem;margin-top:4px;">${(e.msg||'')}</div>
+                    </div>
+                    <div class="btn-group">
+                        ${approved
+                            ? `<button class="btn btn-secondary" style="padding:6px 12px;font-size:0.65rem;" onclick="setGuestbookApproved('${key}', false)">Unapprove</button>`
+                            : `<button class="btn btn-primary" style="padding:6px 12px;font-size:0.65rem;" onclick="setGuestbookApproved('${key}', true)">Approve</button>`}
+                        <button class="btn btn-danger" style="padding:6px 12px;font-size:0.65rem;" onclick="deleteGuestbook('${key}')">Delete</button>
+                    </div>
+                </div>`;
+            }).join('');
+        });
+    }
+    window.setGuestbookApproved = async function(key, approved) {
+        try {
+            await update(ref(db, 'guestbook/' + key), { approved });
+            showStatus('guestbookAdminStatus', approved ? 'Approved' : 'Unapproved');
+        } catch(e) { showStatus('guestbookAdminStatus', 'Error: '+e.message, false); }
+    };
+    window.deleteGuestbook = async function(key) {
+        try {
+            await remove(ref(db, 'guestbook/' + key));
+            showStatus('guestbookAdminStatus', 'Deleted');
+        } catch(e) { showStatus('guestbookAdminStatus', 'Error: '+e.message, false); }
+    };
 
     let adminGameTitles = [];
     const webGameTitles = ["Subway Surfers","Keith Valley Fisher","Polytrack","Ages of Conflict","Piggy Escape","Core Ball","CircleoO","BitLife","Slope","Death Run 3D","Drift Boss","Rocketpult","2048","Cookie Clicker"];
