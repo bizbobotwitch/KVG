@@ -320,8 +320,12 @@
             <label>Maintenance Message</label>
             <textarea id="cfgMaintMsg" placeholder="This platform is temporarily shut down. Please check back later."></textarea>
 
+            <label>Schedule maintenance (auto-offline at this local time)</label>
+            <input type="datetime-local" id="cfgScheduledMaint">
+
             <div class="btn-group">
                 <button class="btn btn-primary" onclick="saveMaintenance()">Save Maintenance Settings</button>
+                <button class="btn btn-secondary" onclick="clearScheduledMaint()">Clear Schedule</button>
             </div>
             <div id="maintStatus" class="status"></div>
         </div>
@@ -394,16 +398,45 @@
             <div id="refreshStatus" class="status"></div>
         </div>
 
+        <!-- FEATURED / GAME PICKER -->
+        <div class="card">
+            <h2>◈ Featured Games (easy pick)</h2>
+            <p style="font-size:0.8rem;color:var(--muted);margin-bottom:12px;">Click games below to toggle featured. Multiple allowed. They pin to the top with a gold badge.</p>
+            <div id="featuredPicker" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;max-height:180px;overflow-y:auto;"></div>
+            <label>Or type titles (comma-separated)</label>
+            <input type="text" id="cfgFeaturedGame" placeholder="Game A, Game B">
+            <label>Game of the Day</label>
+            <select id="cfgGameOfTheDaySelect" style="width:100%;padding:12px 14px;background:rgba(0,0,0,0.45);border:1px solid var(--glass-border);border-radius:10px;color:white;font-family:Syne,sans-serif;font-size:0.95rem;margin-bottom:10px;">
+                <option value="">— None —</option>
+            </select>
+            <input type="text" id="cfgGameOfTheDay" placeholder="Or type exact title" style="margin-bottom:14px;">
+            <label>NEW badge games (click to toggle)</label>
+            <div id="newGamesPicker" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;max-height:140px;overflow-y:auto;"></div>
+            <input type="text" id="cfgNewGames" placeholder="Or type: Game A, Game B">
+            <label>Hidden games (click to hide from site)</label>
+            <div id="hiddenGamesPicker" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;max-height:140px;overflow-y:auto;"></div>
+            <input type="text" id="cfgHiddenGames" placeholder="Or type titles to hide">
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="saveFeaturedStuff()">Save Featured / New / Hidden</button>
+                <button class="btn btn-secondary" onclick="loadGameList()">Refresh Game List</button>
+            </div>
+            <div id="featuredStatus" class="status"></div>
+        </div>
+
         <!-- EXTRAS -->
         <div class="card">
-            <h2>◈ Featured / New / Colors / Tip</h2>
-            <label>Featured Game (exact title)</label>
-            <input type="text" id="cfgFeaturedGame" placeholder="Hollow Knight">
-            <label>New Games (comma-separated for NEW badge)</label>
-            <input type="text" id="cfgNewGames" placeholder="Game A, Game B">
+            <h2>◈ Colors / Tip / Changelog</h2>
             <div class="row">
                 <div><label>Neon Color</label><input type="text" id="cfgAccentNeon" placeholder="#00ff88"></div>
                 <div><label>Ice Color</label><input type="text" id="cfgAccentIce" placeholder="#00b4ff"></div>
+            </div>
+            <label>Theme presets</label>
+            <div class="btn-group" style="margin-bottom:14px;">
+                <button class="btn btn-secondary" type="button" onclick="applyThemePreset('neon')">Neon Green</button>
+                <button class="btn btn-secondary" type="button" onclick="applyThemePreset('purple')">Purple</button>
+                <button class="btn btn-secondary" type="button" onclick="applyThemePreset('red')">Hot Red</button>
+                <button class="btn btn-secondary" type="button" onclick="applyThemePreset('gold')">Gold</button>
+                <button class="btn btn-secondary" type="button" onclick="applyThemePreset('ice')">Ice Blue</button>
             </div>
             <label>Footer Tip</label>
             <input type="text" id="cfgFooterTip" placeholder="Have fun out there">
@@ -411,9 +444,15 @@
             <textarea id="cfgChangelog" placeholder="- Added games&#10;- Fixes"></textarea>
             <label>Announcement auto-hide (hours, 0 = never)</label>
             <input type="text" id="cfgAnnounceHideHours" placeholder="24">
+            <label>Staff note (only visible in admin)</label>
+            <textarea id="cfgStaffNote" placeholder="Private notes to yourself…"></textarea>
             <div class="toggle-row">
                 <span class="toggle-label">Download bubble sound</span>
                 <label class="switch"><input type="checkbox" id="cfgBubbleSound" checked><span class="slider"></span></label>
+            </div>
+            <div class="toggle-row">
+                <span class="toggle-label">Show stats bar on homepage</span>
+                <label class="switch"><input type="checkbox" id="cfgShowStats" checked><span class="slider"></span></label>
             </div>
             <div class="btn-group"><button class="btn btn-primary" onclick="saveExtras()">Save Extras</button></div>
             <div id="extrasStatus" class="status"></div>
@@ -421,9 +460,13 @@
 
         <div class="card">
             <h2>◈ Broadcast Popup</h2>
+            <p style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;">Shows once to visitors online within 10 minutes. Not forever.</p>
             <label>Message shown to every visitor</label>
             <textarea id="cfgBroadcastMsg" placeholder="Server restart in 5 min!"></textarea>
-            <div class="btn-group"><button class="btn btn-danger" onclick="sendBroadcast()">Send Broadcast Now</button></div>
+            <div class="btn-group">
+                <button class="btn btn-danger" onclick="sendBroadcast()">Send Broadcast Now</button>
+                <button class="btn btn-secondary" onclick="clearBroadcast()">Clear Broadcast</button>
+            </div>
             <div id="broadcastStatus" class="status"></div>
         </div>
 
@@ -451,12 +494,16 @@
             <h2>◈ Quick Actions</h2>
             <div class="btn-group">
                 <button class="btn btn-danger" onclick="forceShutdown()">Force Shutdown Now</button>
+                <button class="btn btn-secondary" onclick="forceGlobalRefresh()">Force Global Refresh</button>
                 <button class="btn btn-secondary" onclick="clearAllTimers()">Clear All Timers</button>
                 <button class="btn btn-secondary" onclick="resetBranding()">Reset Branding</button>
                 <button class="btn btn-secondary" onclick="exportDownloadsCSV()">Export Downloads CSV</button>
+                <button class="btn btn-secondary" onclick="exportConfigJSON()">Export Config JSON</button>
                 <button class="btn btn-danger" onclick="resetLiveData()">Reset Live Data</button>
+                <button class="btn btn-secondary" onclick="clearAnnouncement()">Clear Announcement</button>
             </div>
             <div id="quickStatus" class="status"></div>
+            <div id="staffNoteDisplay" style="margin-top:14px;padding:12px;background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:10px;font-size:0.85rem;color:var(--gold);display:none;"></div>
         </div>
     </div>
 </div>
@@ -494,6 +541,7 @@
             loadTimers();
             loadUpcoming();
             loadLiveActivity();
+            loadGameList();
         } else {
             status.textContent = "Wrong password";
             status.className = "status err";
@@ -523,29 +571,184 @@
             document.getElementById('cfgAnnouncementEnabled').checked = !!cfg.announcementEnabled;
             document.getElementById('cfgAnnouncementMsg').value = cfg.announcementMsg || "";
             document.getElementById('cfgFeaturedGame').value = cfg.featuredGame || "";
+            document.getElementById('cfgGameOfTheDay').value = cfg.gameOfTheDay || "";
             document.getElementById('cfgNewGames').value = cfg.newGames || "";
+            document.getElementById('cfgHiddenGames').value = cfg.hiddenGames || "";
             document.getElementById('cfgAccentNeon').value = cfg.accentNeon || "#00ff88";
             document.getElementById('cfgAccentIce').value = cfg.accentIce || "#00b4ff";
             document.getElementById('cfgFooterTip').value = cfg.footerTip || "";
             document.getElementById('cfgChangelog').value = cfg.changelog || "";
             document.getElementById('cfgAnnounceHideHours').value = cfg.announcementHideAfterHours || "";
             document.getElementById('cfgBubbleSound').checked = cfg.bubbleSound !== false;
+            document.getElementById('cfgShowStats').checked = cfg.showStats !== false;
+            document.getElementById('cfgStaffNote').value = cfg.staffNote || "";
+            const noteBox = document.getElementById('staffNoteDisplay');
+            if (cfg.staffNote) {
+                noteBox.style.display = 'block';
+                noteBox.textContent = '📌 Staff note: ' + cfg.staffNote;
+            } else noteBox.style.display = 'none';
+            if (cfg.scheduledMaintenanceAt) {
+                try {
+                    const d = new Date(cfg.scheduledMaintenanceAt);
+                    const local = new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+                    document.getElementById('cfgScheduledMaint').value = local;
+                } catch(e) {}
+            } else {
+                document.getElementById('cfgScheduledMaint').value = '';
+            }
+            renderPickers();
+            syncGameOfDaySelect();
         }, { onlyOnce: true });
     }
+
+    let adminGameTitles = [];
+    const webGameTitles = ["Subway Surfers","Keith Valley Fisher","Polytrack","Ages of Conflict","Piggy Escape","Core Ball","CircleoO","BitLife","Slope","Death Run 3D","Drift Boss","Rocketpult","2048","Cookie Clicker"];
+
+    window.loadGameList = async function() {
+        try {
+            const res = await fetch('https://api.github.com/repos/bizbobotwitch/GAME/releases/tags/Games');
+            const release = await res.json();
+            const titles = (release.assets || [])
+                .filter(a => !a.name.match(/\.(png|jpg|jpeg|webp)$/i))
+                .map(a => a.name.split('.')[0].replace(/-KVGAMES/gi, '').trim())
+                .filter(Boolean);
+            adminGameTitles = [...new Set([...titles, ...webGameTitles])].sort((a,b) => a.localeCompare(b));
+            renderPickers();
+            syncGameOfDaySelect();
+            showStatus('featuredStatus', 'Loaded ' + adminGameTitles.length + ' games');
+        } catch(e) {
+            adminGameTitles = webGameTitles.slice();
+            renderPickers();
+            syncGameOfDaySelect();
+            showStatus('featuredStatus', 'GitHub failed — using web games list', false);
+        }
+    };
+
+    function parseList(id) {
+        return (document.getElementById(id).value || '').split(',').map(s => s.trim()).filter(Boolean);
+    }
+    function writeList(id, arr) {
+        document.getElementById(id).value = arr.join(', ');
+    }
+
+    function renderPickers() {
+        const featured = new Set(parseList('cfgFeaturedGame').map(s => s.toLowerCase()));
+        const news = new Set(parseList('cfgNewGames').map(s => s.toLowerCase()));
+        const hidden = new Set(parseList('cfgHiddenGames').map(s => s.toLowerCase()));
+        const mk = (containerId, set, fieldId, activeColor) => {
+            const el = document.getElementById(containerId);
+            if (!el) return;
+            if (!adminGameTitles.length) {
+                el.innerHTML = '<span style="color:var(--muted);font-size:0.8rem;">Click “Refresh Game List” to load titles</span>';
+                return;
+            }
+            el.innerHTML = adminGameTitles.map(title => {
+                const on = set.has(title.toLowerCase());
+                return `<button type="button" data-title="${title.replace(/"/g,'&quot;')}" style="padding:6px 10px;border-radius:8px;font-size:0.72rem;cursor:pointer;border:1px solid ${on ? activeColor : 'var(--glass-border)'};background:${on ? 'rgba(0,255,136,0.12)' : 'rgba(0,0,0,0.3)'};color:${on ? 'var(--neon)' : 'var(--text)'};">${title}</button>`;
+            }).join('');
+            el.querySelectorAll('button').forEach(btn => {
+                btn.onclick = () => {
+                    const t = btn.getAttribute('data-title');
+                    let arr = parseList(fieldId);
+                    const lower = arr.map(x => x.toLowerCase());
+                    const i = lower.indexOf(t.toLowerCase());
+                    if (i >= 0) arr.splice(i, 1);
+                    else arr.push(t);
+                    writeList(fieldId, arr);
+                    renderPickers();
+                };
+            });
+        };
+        mk('featuredPicker', featured, 'cfgFeaturedGame', 'rgba(255,215,0,0.5)');
+        mk('newGamesPicker', news, 'cfgNewGames', 'rgba(255,58,110,0.5)');
+        mk('hiddenGamesPicker', hidden, 'cfgHiddenGames', 'rgba(255,58,110,0.5)');
+    }
+
+    function syncGameOfDaySelect() {
+        const sel = document.getElementById('cfgGameOfTheDaySelect');
+        if (!sel) return;
+        const current = document.getElementById('cfgGameOfTheDay').value.trim();
+        sel.innerHTML = '<option value="">— None —</option>' + adminGameTitles.map(t =>
+            `<option value="${t.replace(/"/g,'&quot;')}" ${t === current ? 'selected' : ''}>${t}</option>`
+        ).join('');
+        sel.onchange = () => {
+            document.getElementById('cfgGameOfTheDay').value = sel.value;
+        };
+    }
+
+    window.saveFeaturedStuff = async function() {
+        try {
+            await update(ref(db, 'siteConfig'), {
+                featuredGame: document.getElementById('cfgFeaturedGame').value.trim(),
+                gameOfTheDay: document.getElementById('cfgGameOfTheDay').value.trim(),
+                newGames: document.getElementById('cfgNewGames').value.trim(),
+                hiddenGames: document.getElementById('cfgHiddenGames').value.trim()
+            });
+            await push(ref(db, 'activityLog'), { type: 'config', title: 'Featured/New/Hidden updated', ts: Date.now() });
+            showStatus('featuredStatus', 'Featured / New / Hidden saved — live now');
+        } catch(e) { showStatus('featuredStatus', 'Error: '+e.message, false); }
+    };
+
+    window.applyThemePreset = function(name) {
+        const presets = {
+            neon: { neon: '#00ff88', ice: '#00b4ff' },
+            purple: { neon: '#b388ff', ice: '#7c4dff' },
+            red: { neon: '#ff3a6e', ice: '#ff8a65' },
+            gold: { neon: '#ffd700', ice: '#ffb300' },
+            ice: { neon: '#00e5ff', ice: '#2979ff' }
+        };
+        const p = presets[name];
+        if (!p) return;
+        document.getElementById('cfgAccentNeon').value = p.neon;
+        document.getElementById('cfgAccentIce').value = p.ice;
+    };
+
+    window.clearBroadcast = async function() {
+        try {
+            await update(ref(db, 'siteConfig'), { broadcastMsg: '', broadcastToken: null });
+            document.getElementById('cfgBroadcastMsg').value = '';
+            showStatus('broadcastStatus', 'Broadcast cleared');
+        } catch(e) { showStatus('broadcastStatus', 'Error: '+e.message, false); }
+    };
+
+    window.clearAnnouncement = async function() {
+        try {
+            await update(ref(db, 'siteConfig'), { announcementEnabled: false, announcementMsg: '' });
+            document.getElementById('cfgAnnouncementEnabled').checked = false;
+            document.getElementById('cfgAnnouncementMsg').value = '';
+            showStatus('quickStatus', 'Announcement cleared');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+
+    window.exportConfigJSON = async function() {
+        try {
+            const snap = await new Promise(res => onValue(ref(db, 'siteConfig'), s => res(s), { onlyOnce: true }));
+            const blob = new Blob([JSON.stringify(snap.val() || {}, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'kvg-siteConfig.json';
+            a.click();
+            showStatus('quickStatus', 'Config JSON downloaded');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
 
     window.saveExtras = async function() {
         try {
             await update(ref(db, 'siteConfig'), {
-                featuredGame: document.getElementById('cfgFeaturedGame').value.trim(),
-                newGames: document.getElementById('cfgNewGames').value.trim(),
                 accentNeon: document.getElementById('cfgAccentNeon').value.trim() || "#00ff88",
                 accentIce: document.getElementById('cfgAccentIce').value.trim() || "#00b4ff",
                 footerTip: document.getElementById('cfgFooterTip').value.trim(),
                 changelog: document.getElementById('cfgChangelog').value,
                 announcementHideAfterHours: document.getElementById('cfgAnnounceHideHours').value.trim() || "0",
-                bubbleSound: document.getElementById('cfgBubbleSound').checked
+                bubbleSound: document.getElementById('cfgBubbleSound').checked,
+                showStats: document.getElementById('cfgShowStats').checked,
+                staffNote: document.getElementById('cfgStaffNote').value.trim()
             });
             await push(ref(db, 'activityLog'), { type: 'config', title: 'Extras updated', ts: Date.now() });
+            const noteBox = document.getElementById('staffNoteDisplay');
+            const note = document.getElementById('cfgStaffNote').value.trim();
+            if (note) { noteBox.style.display = 'block'; noteBox.textContent = '📌 Staff note: ' + note; }
+            else noteBox.style.display = 'none';
             showStatus('extrasStatus', 'Extras saved — live now');
         } catch(e) { showStatus('extrasStatus', 'Error: '+e.message, false); }
     };
@@ -607,12 +810,26 @@
 
     window.saveMaintenance = async function() {
         try {
-            await update(ref(db, 'siteConfig'), {
+            const schedVal = document.getElementById('cfgScheduledMaint').value;
+            const payload = {
                 maintenance: document.getElementById('cfgMaintenance').checked,
                 maintenanceTitle: document.getElementById('cfgMaintTitle').value.trim() || "SITE OFFLINE",
                 maintenanceMsg: document.getElementById('cfgMaintMsg').value.trim() || "This platform is temporarily shut down. Please check back later."
-            });
+            };
+            if (schedVal) payload.scheduledMaintenanceAt = new Date(schedVal).toISOString();
+            else payload.scheduledMaintenanceAt = null;
+            await update(ref(db, 'siteConfig'), payload);
             showStatus('maintStatus', "Maintenance settings saved — live now");
+        } catch (e) {
+            showStatus('maintStatus', "Error: " + e.message, false);
+        }
+    };
+
+    window.clearScheduledMaint = async function() {
+        try {
+            document.getElementById('cfgScheduledMaint').value = '';
+            await update(ref(db, 'siteConfig'), { scheduledMaintenanceAt: null });
+            showStatus('maintStatus', "Schedule cleared");
         } catch (e) {
             showStatus('maintStatus', "Error: " + e.message, false);
         }
