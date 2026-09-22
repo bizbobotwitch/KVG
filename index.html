@@ -532,6 +532,7 @@
                 <button class="btn btn-danger" onclick="resetLiveData()">Reset Live Data</button>
                 <button class="btn btn-secondary" onclick="clearAnnouncement()">Clear Announcement</button>
                 <button class="btn btn-primary" onclick="throwConfetti()">🎉 Throw Confetti</button>
+                <button class="btn btn-secondary" onclick="triggerGabeMode()">🐸 Gabe Mode (10s)</button>
                 <button class="btn btn-secondary" onclick="simulateDownload()">Simulate Download Bubble</button>
             </div>
             <div id="quickStatus" class="status"></div>
@@ -840,6 +841,13 @@
                 setTimeout(() => el.remove(), 4000);
             }
             showStatus('quickStatus', 'Confetti thrown on all open site tabs!');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+
+    window.triggerGabeMode = async function() {
+        try {
+            await update(ref(db, 'siteConfig'), { gabeToken: Date.now() });
+            showStatus('quickStatus', 'Gabe Mode sent — all open site tabs for 10s');
         } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
     };
 
