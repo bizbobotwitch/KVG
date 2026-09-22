@@ -485,7 +485,10 @@
             </div>
             <h3 style="font-family:'Orbitron'; font-size:0.7rem; color:var(--muted); letter-spacing:2px; margin-bottom:10px;">RECENT DOWNLOADS</h3>
             <div id="adminRecentDownloads" style="max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
-            <h3 style="font-family:'Orbitron'; font-size:0.75rem; color:var(--hot); letter-spacing:2px; margin:18px 0 10px;">⚠ BROKEN GAME REPORTS <span id="reportCountBadge" style="background:var(--hot);color:#fff;border-radius:999px;padding:2px 8px;font-size:0.65rem;margin-left:6px;display:none;">0</span></h3>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin:18px 0 10px;">
+                <h3 style="font-family:'Orbitron'; font-size:0.75rem; color:var(--hot); letter-spacing:2px; margin:0;">⚠ BROKEN GAME REPORTS <span id="reportCountBadge" style="background:var(--hot);color:#fff;border-radius:999px;padding:2px 8px;font-size:0.65rem;margin-left:6px;display:none;">0</span></h3>
+                <button type="button" class="btn btn-danger" style="padding:6px 12px; font-size:0.65rem;" onclick="clearAllReports()">Clear All Reports</button>
+            </div>
             <div id="adminReportsList" style="max-height:200px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; margin-bottom:4px;"></div>
             <h3 style="font-family:'Orbitron'; font-size:0.7rem; color:var(--muted); letter-spacing:2px; margin:16px 0 10px;">ACTIVITY LOG</h3>
             <div id="adminActivityLog" style="max-height:160px; overflow-y:auto; font-family:'Space Mono'; font-size:0.7rem; color:var(--muted);"></div>
@@ -1190,7 +1193,7 @@
 
         onValue(query(ref(db, 'activityLog'), orderByChild('ts'), limitToLast(50)), (snap) => {
             const data = snap.val() || {};
-            const entries = Object.values(data).sort((a,b)=>(b.ts||0)-(a.ts||0));
+            const entries = Object.entries(data).map(([key, e]) => ({ key, ...e })).sort((a,b)=>(b.ts||0)-(a.ts||0));
             const reports = entries.filter(e => e.type === 'report');
             const reportBox = document.getElementById('adminReportsList');
             const badge = document.getElementById('reportCountBadge');
@@ -1202,9 +1205,12 @@
                     if (badge) { badge.style.display = 'inline'; badge.textContent = String(reports.length); }
                     reportBox.innerHTML = reports.map(e => {
                         const t = e.ts ? new Date(e.ts).toLocaleString() : '';
-                        return `<div style="padding:10px 12px;background:rgba(255,58,110,0.1);border:1px solid rgba(255,58,110,0.35);border-radius:10px;">
-                            <div style="font-family:Orbitron,monospace;color:var(--hot);font-size:0.8rem;">⚠ ${(e.title||'Unknown').replace(/</g,'')}</div>
-                            <div style="font-family:Space Mono,monospace;font-size:0.68rem;color:var(--muted);margin-top:4px;">${t}</div>
+                        return `<div style="padding:10px 12px;background:rgba(255,58,110,0.1);border:1px solid rgba(255,58,110,0.35);border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                            <div style="min-width:0;">
+                                <div style="font-family:Orbitron,monospace;color:var(--hot);font-size:0.8rem;">⚠ ${(e.title||'Unknown').replace(/</g,'')}</div>
+                                <div style="font-family:Space Mono,monospace;font-size:0.68rem;color:var(--muted);margin-top:4px;">${t}</div>
+                            </div>
+                            <button type="button" class="btn btn-danger" style="padding:6px 12px;font-size:0.65rem;flex-shrink:0;" onclick="deleteReport('${e.key}')">Remove</button>
                         </div>`;
                     }).join('');
                 }
@@ -1220,6 +1226,31 @@
             }).join('');
         });
     }
+
+    window.deleteReport = async function(key) {
+        try {
+            await remove(ref(db, 'activityLog/' + key));
+            showStatus('quickStatus', 'Report removed');
+        } catch(e) {
+            showStatus('quickStatus', 'Error: ' + e.message, false);
+        }
+    };
+
+    window.clearAllReports = async function() {
+        if (!confirm('Remove all broken-game reports?')) return;
+        try {
+            const snap = await new Promise(res => onValue(ref(db, 'activityLog'), s => res(s), { onlyOnce: true }));
+            const data = snap.val() || {};
+            const ops = [];
+            Object.entries(data).forEach(([key, e]) => {
+                if (e && e.type === 'report') ops.push(remove(ref(db, 'activityLog/' + key)));
+            });
+            await Promise.all(ops);
+            showStatus('quickStatus', 'All reports cleared');
+        } catch(e) {
+            showStatus('quickStatus', 'Error: ' + e.message, false);
+        }
+    };
 
     function spawnAdminBubble(item) {
         const container = document.getElementById('downloadBubbles');
