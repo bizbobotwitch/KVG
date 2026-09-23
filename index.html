@@ -368,6 +368,31 @@
             <div id="upcomingStatus" class="status"></div>
         </div>
 
+        <!-- CUSTOM WEB GAMES -->
+        <div class="card">
+            <h2>◈ Web Games (add your own)</h2>
+            <p style="font-size:0.8rem;color:var(--muted);margin-bottom:12px;">These appear in the Web Games tab on the main site (in addition to the built-in list).</p>
+            <div id="webGamesAdminList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;max-height:240px;overflow-y:auto;"></div>
+            <label>Title</label>
+            <input type="text" id="newWebTitle" placeholder="My Cool Game">
+            <label>URL (https://…)</label>
+            <input type="text" id="newWebUrl" placeholder="https://example.com/game">
+            <div class="row">
+                <div>
+                    <label>Emoji / icon</label>
+                    <input type="text" id="newWebThumb" placeholder="🎮" value="🎮">
+                </div>
+                <div>
+                    <label>Tag</label>
+                    <input type="text" id="newWebTag" placeholder="ARCADE" value="WEB">
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="addWebGame()">Add Web Game</button>
+            </div>
+            <div id="webGamesStatus" class="status"></div>
+        </div>
+
         <!-- GLOBAL ANNOUNCEMENT -->
         <div class="card">
             <h2>◈ Global Announcement</h2>
@@ -532,8 +557,35 @@
                 <button class="btn btn-danger" onclick="resetLiveData()">Reset Live Data</button>
                 <button class="btn btn-secondary" onclick="clearAnnouncement()">Clear Announcement</button>
                 <button class="btn btn-primary" onclick="throwConfetti()">🎉 Throw Confetti</button>
-                <button class="btn btn-secondary" onclick="triggerGabeMode()">🐸 Gabe Mode (10s)</button>
                 <button class="btn btn-secondary" onclick="simulateDownload()">Simulate Download Bubble</button>
+            </div>
+            <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; align-items:end;">
+                <div style="flex:1; min-width:120px;">
+                    <label>Gabe Mode seconds</label>
+                    <input type="number" id="cfgGabeSeconds" value="10" min="1" max="300">
+                </div>
+                <button class="btn btn-secondary" type="button" onclick="triggerGabeMode()">🐸 Gabe Mode</button>
+            </div>
+            <div style="margin-top:14px;">
+                <label>Shoutout (shows for 1 minute)</label>
+                <input type="text" id="cfgShoutout" placeholder="Welcome back, Biz!">
+                <div class="btn-group">
+                    <button class="btn btn-primary" type="button" onclick="sendShoutout()">Send Shoutout</button>
+                </div>
+            </div>
+            <div class="toggle-row" style="margin-top:14px;">
+                <span class="toggle-label">Freeze all downloads</span>
+                <label class="switch"><input type="checkbox" id="cfgFreezeDownloads" onchange="toggleFreezeDownloads()"><span class="slider"></span></label>
+            </div>
+            <div style="margin-top:14px;">
+                <label>Poll question</label>
+                <input type="text" id="cfgPollQuestion" placeholder="Next game should be…">
+                <label>Poll options (comma-separated, min 2)</label>
+                <input type="text" id="cfgPollOptions" placeholder="Horror, Racing, Indie">
+                <div class="btn-group">
+                    <button class="btn btn-primary" type="button" onclick="savePoll()">Save / Start Poll</button>
+                    <button class="btn btn-secondary" type="button" onclick="clearPoll()">Clear Poll</button>
+                </div>
             </div>
             <div id="quickStatus" class="status"></div>
             <div id="staffNoteDisplay" style="margin-top:14px;padding:12px;background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:10px;font-size:0.85rem;color:var(--gold);display:none;"></div>
@@ -576,6 +628,7 @@
             loadLiveActivity();
             loadGameList();
             loadGuestbookAdmin();
+            loadWebGamesAdmin();
         } else {
             status.textContent = "Wrong password";
             status.className = "status err";
@@ -616,6 +669,12 @@
             document.getElementById('cfgBubbleSound').checked = cfg.bubbleSound !== false;
             document.getElementById('cfgShowStats').checked = cfg.showStats !== false;
             document.getElementById('cfgStaffNote').value = cfg.staffNote || "";
+            const freezeEl = document.getElementById('cfgFreezeDownloads');
+            if (freezeEl) freezeEl.checked = !!cfg.freezeDownloads;
+            const pq = document.getElementById('cfgPollQuestion');
+            if (pq) pq.value = cfg.pollQuestion || '';
+            const po = document.getElementById('cfgPollOptions');
+            if (po) po.value = cfg.pollOptions || '';
             const noteBox = document.getElementById('staffNoteDisplay');
             if (cfg.staffNote) {
                 noteBox.style.display = 'block';
@@ -846,8 +905,57 @@
 
     window.triggerGabeMode = async function() {
         try {
-            await update(ref(db, 'siteConfig'), { gabeToken: Date.now() });
-            showStatus('quickStatus', 'Gabe Mode sent — all open site tabs for 10s');
+            const secs = parseInt(document.getElementById('cfgGabeSeconds').value, 10) || 10;
+            await update(ref(db, 'siteConfig'), { gabeToken: Date.now(), gabeDuration: secs });
+            showStatus('quickStatus', 'Gabe Mode sent for ' + secs + 's on all open tabs');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+
+    window.sendShoutout = async function() {
+        const msg = document.getElementById('cfgShoutout').value.trim();
+        if (!msg) { showStatus('quickStatus', 'Shoutout message required', false); return; }
+        try {
+            await update(ref(db, 'siteConfig'), {
+                shoutoutMsg: msg,
+                shoutoutUntil: Date.now() + 60 * 1000
+            });
+            showStatus('quickStatus', 'Shoutout live for 1 minute');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+
+    window.toggleFreezeDownloads = async function() {
+        try {
+            const on = document.getElementById('cfgFreezeDownloads').checked;
+            await update(ref(db, 'siteConfig'), { freezeDownloads: on });
+            showStatus('quickStatus', on ? 'Downloads FROZEN site-wide' : 'Downloads unfrozen');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+
+    window.savePoll = async function() {
+        try {
+            const q = document.getElementById('cfgPollQuestion').value.trim();
+            const opts = document.getElementById('cfgPollOptions').value.trim();
+            if (!q || opts.split(',').filter(s => s.trim()).length < 2) {
+                showStatus('quickStatus', 'Need a question and at least 2 options', false);
+                return;
+            }
+            await set(ref(db, 'pollVotes'), null);
+            await update(ref(db, 'siteConfig'), {
+                pollQuestion: q,
+                pollOptions: opts,
+                pollId: String(Date.now())
+            });
+            showStatus('quickStatus', 'Poll is live — votes reset');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+
+    window.clearPoll = async function() {
+        try {
+            document.getElementById('cfgPollQuestion').value = '';
+            document.getElementById('cfgPollOptions').value = '';
+            await update(ref(db, 'siteConfig'), { pollQuestion: '', pollOptions: '', pollId: null });
+            await set(ref(db, 'pollVotes'), null);
+            showStatus('quickStatus', 'Poll cleared');
         } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
     };
 
@@ -1120,6 +1228,62 @@
             </div>`;
         }).join('');
     }
+
+    function loadWebGamesAdmin() {
+        onValue(ref(db, 'customWebGames'), (snap) => {
+            const data = snap.val() || {};
+            const entries = Object.entries(data);
+            const el = document.getElementById('webGamesAdminList');
+            if (!el) return;
+            if (!entries.length) {
+                el.innerHTML = '<p style="color:var(--muted);font-size:0.85rem;">No custom web games yet.</p>';
+                return;
+            }
+            el.innerHTML = entries.map(([key, g]) => `
+                <div class="timer-item">
+                    <div class="info">
+                        <div class="title">${g.thumb || '🎮'} ${g.title || 'Untitled'}</div>
+                        <div class="date">${g.tag || 'WEB'} · ${(g.url || '').slice(0, 40)}${(g.url||'').length>40?'…':''}</div>
+                    </div>
+                    <button class="btn btn-danger" style="padding:8px 14px; font-size:0.65rem;" onclick="deleteWebGame('${key}')">Delete</button>
+                </div>
+            `).join('');
+        });
+    }
+
+    window.addWebGame = async function() {
+        const title = document.getElementById('newWebTitle').value.trim();
+        const url = document.getElementById('newWebUrl').value.trim();
+        const thumb = document.getElementById('newWebThumb').value.trim() || '🎮';
+        const tag = document.getElementById('newWebTag').value.trim() || 'WEB';
+        if (!title || !url) {
+            showStatus('webGamesStatus', 'Title and URL required', false);
+            return;
+        }
+        if (!/^https?:\/\//i.test(url)) {
+            showStatus('webGamesStatus', 'URL must start with http:// or https://', false);
+            return;
+        }
+        try {
+            await push(ref(db, 'customWebGames'), { title, url, thumb, tag });
+            document.getElementById('newWebTitle').value = '';
+            document.getElementById('newWebUrl').value = '';
+            document.getElementById('newWebThumb').value = '🎮';
+            document.getElementById('newWebTag').value = 'WEB';
+            showStatus('webGamesStatus', 'Web game added — live on site');
+        } catch (e) {
+            showStatus('webGamesStatus', 'Error: ' + e.message, false);
+        }
+    };
+
+    window.deleteWebGame = async function(key) {
+        try {
+            await remove(ref(db, 'customWebGames/' + key));
+            showStatus('webGamesStatus', 'Web game removed');
+        } catch (e) {
+            showStatus('webGamesStatus', 'Error: ' + e.message, false);
+        }
+    };
 
     window.addUpcoming = async function() {
         const title = document.getElementById('newUpcomingTitle').value.trim();
