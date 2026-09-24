@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Keith Valley Games</title>
+    <title>KVG Admin Panel</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Syne:wght@400;600;800&family=Space+Mono&display=swap" rel="stylesheet">
     <style>
@@ -21,14 +21,13 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        html { scroll-behavior: smooth; }
 
         body {
             font-family: 'Syne', sans-serif;
             background: var(--void);
             color: var(--text);
             min-height: 100vh;
-            overflow-x: hidden;
+            padding: 30px 20px;
         }
 
         body::before {
@@ -40,494 +39,565 @@
             z-index: 9999;
         }
 
-        .grid-bg {
-            position: fixed;
-            inset: 0;
-            background-image: linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
-            background-size: 60px 60px;
-            animation: gridShift 20s linear infinite;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        @keyframes gridShift {
-            0% { background-position: 0 0; }
-            100% { background-position: 60px 60px; }
-        }
-
-        .topbar {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 14px 40px;
-            background: rgba(4,4,10,0.85);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--glass-border);
-        }
-
-        .topbar-logo {
-            font-family: 'Orbitron', monospace;
-            font-size: 1.2rem;
-            font-weight: 900;
-            letter-spacing: 3px;
-            color: var(--neon);
-            text-shadow: 0 0 20px rgba(0,255,136,0.5);
-            text-transform: uppercase;
-        }
-
-        .hero {
+        .container {
             position: relative;
             z-index: 1;
-            text-align: center;
-            padding: 80px 20px 60px;
-        }
-
-        .hero-eyebrow {
-            font-family: 'Space Mono', monospace;
-            font-size: 0.75rem;
-            letter-spacing: 6px;
-            color: var(--muted);
-            text-transform: uppercase;
-            margin-bottom: 20px;
+            max-width: 720px;
+            margin: 0 auto;
         }
 
         h1 {
             font-family: 'Orbitron', monospace;
-            font-size: clamp(2.5rem, 7vw, 6rem);
-            font-weight: 900;
-            line-height: 1;
-            margin-bottom: 20px;
+            font-size: 1.6rem;
+            color: var(--neon);
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            text-shadow: 0 0 20px rgba(0,255,136,0.4);
         }
 
-        h1 .line1 { display: block; background: linear-gradient(135deg, #fff 30%, var(--neon)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        h1 .line2 { display: block; background: linear-gradient(135deg, var(--neon), var(--ice)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 25px rgba(0,255,136,0.4)); }
+        .subtitle {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+        }
 
-        .stats-bar {
-            display: flex;
-            justify-content: center;
-            gap: 0;
-            max-width: 500px;
-            margin: 0 auto 60px;
+        .card {
+            background: var(--glass);
             border: 1px solid var(--glass-border);
             border-radius: 16px;
-            background: var(--glass);
+            padding: 24px;
+            margin-bottom: 20px;
         }
 
-        .stat-item { flex: 1; padding: 20px; text-align: center; border-right: 1px solid var(--glass-border); }
-        .stat-item:last-child { border-right: none; }
-        .stat-num { font-family: 'Orbitron', monospace; font-size: 1.8rem; font-weight: 700; color: var(--neon); display: block; }
-        .stat-lbl { font-size: 0.72rem; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; display: block; }
-
-        .search-wrap { position: relative; z-index: 1; max-width: 640px; margin: 0 auto 50px; padding: 0 20px; }
-        #searchInput { width: 100%; padding: 18px 20px 18px 52px; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); border-radius: 14px; color: white; font-family: 'Syne', sans-serif; font-size: 1rem; backdrop-filter: blur(10px); transition: 0.3s; }
-        #searchInput:focus { outline: none; border-color: var(--neon); box-shadow: 0 0 0 3px rgba(0,255,136,0.1), inset 0 0 20px rgba(0,255,136,0.03); }
-        .search-icon { position: absolute; left: 38px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 1.1rem; }
-
-        .page-body { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 0 30px 80px; display: grid; grid-template-columns: 1fr 340px; gap: 40px; align-items: start; }
-
-        .tabs { display: flex; gap: 4px; margin-bottom: 30px; background: rgba(0,0,0,0.4); border-radius: 14px; padding: 6px; border: 1px solid var(--glass-border); }
-        .tab { flex: 1; padding: 12px 20px; font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.82rem; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; border-radius: 10px; border: none; background: transparent; color: var(--muted); transition: 0.3s; text-align: center; }
-        .tab.active { background: linear-gradient(135deg, rgba(0,255,136,0.15), rgba(0,180,255,0.1)); color: white; border: 1px solid rgba(0,255,136,0.25); text-shadow: 0 0 12px rgba(0,255,136,0.4); }
-        .tab:hover:not(.active) { color: #aaa; background: rgba(255,255,255,0.04); }
-
-        .game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 20px; }
-        
-        .card-item { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease; }
-        .card-item:hover { transform: translateY(-8px); border-color: rgba(0,255,136,0.35); box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,255,136,0.1); }
-
-        .thumb-box { height: 165px; background: #080810; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; position: relative; overflow: hidden; }
-        .thumb-box::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.6)); pointer-events: none; z-index: 2;}
-        .thumb-img { width: 100%; height: 100%; object-fit: contain; background: #000; position: relative; z-index: 1; }
-
-        .sticker-new {
-            position: absolute; top: 6px; right: 6px; z-index: 6;
-            width: 56px; height: 56px;
-            display: flex; align-items: center; justify-content: center;
-            pointer-events: none;
-            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.55));
-            animation: stickerPop 0.45s ease-out;
-        }
-        .sticker-new svg { width: 100%; height: 100%; overflow: visible; }
-        @keyframes stickerPop {
-            0% { transform: scale(0) rotate(-25deg); opacity: 0; }
-            70% { transform: scale(1.12) rotate(4deg); }
-            100% { transform: scale(1) rotate(0); opacity: 1; }
-        }
-        .sticker-featured {
-            position: absolute; top: 14px; left: -30px; z-index: 6;
-            background: linear-gradient(135deg, #ffd700, #ffb300);
-            color: #111; font-family: 'Orbitron', monospace;
-            font-size: 0.58rem; font-weight: 900; letter-spacing: 1px;
-            padding: 5px 34px; transform: rotate(-45deg);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.45);
-            text-transform: uppercase; white-space: nowrap;
-        }
-        .card-item.featured-card {
-            border-color: rgba(255,215,0,0.55) !important;
-            box-shadow: 0 0 28px rgba(255,215,0,0.2), 0 12px 40px rgba(0,0,0,0.5);
-        }
-
-        .card-body { padding: 18px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
-        .card-tags { display: flex; gap: 6px; }
-        .tag { font-family: 'Space Mono', monospace; font-size: 0.65rem; padding: 3px 8px; border-radius: 4px; background: rgba(0,180,255,0.1); border: 1px solid rgba(0,180,255,0.2); color: var(--ice); letter-spacing: 1px; text-transform: uppercase; }
-        .card-title { font-family: 'Orbitron', monospace; font-size: 1rem; font-weight: 700; color: white; line-height: 1.2; }
-        .card-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.5; flex: 1; }
-        .card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; padding-top: 14px; border-top: 1px solid var(--glass-border); }
-
-        .btn-play { display: inline-block; padding: 10px 22px; border-radius: 9px; font-family: 'Orbitron', monospace; font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px; text-decoration: none; text-transform: uppercase; cursor: pointer; border: none; transition: 0.3s; }
-        .btn-download { background: linear-gradient(135deg, var(--neon), #00cc70); color: #000; }
-        .btn-download:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0,255,136,0.35); }
-        .btn-play-web { background: linear-gradient(135deg, var(--ice), #007fd4); color: #fff; }
-        .btn-play-web:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0,180,255,0.35); }
-        .btn-report {
-            display: inline-block; padding: 8px 12px; border-radius: 8px;
-            font-family: 'Orbitron', monospace; font-size: 0.62rem; font-weight: 700;
-            letter-spacing: 0.5px; text-transform: uppercase; cursor: pointer;
-            border: 1px solid rgba(255,58,110,0.45); background: rgba(255,58,110,0.12);
-            color: var(--hot); transition: 0.25s;
-        }
-        .btn-report:hover { background: rgba(255,58,110,0.25); border-color: var(--hot); transform: scale(1.04); }
-
-        /* MODAL */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 10000; display: none; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: #0a0a14; border: 1px solid var(--neon); border-radius: 20px; max-width: 500px; width: 100%; padding: 30px; box-shadow: 0 0 30px rgba(0,255,136,0.2); }
-
-        /* ANNOUNCEMENT BANNER */
-        #announcementBanner {
-            display: none;
-            position: relative;
-            z-index: 150;
-            background: linear-gradient(90deg, rgba(0,180,255,0.15), rgba(0,255,136,0.1));
-            border-bottom: 1px solid rgba(0,180,255,0.35);
-            padding: 12px 50px 12px 20px;
-            text-align: center;
-            font-family: 'Space Mono', monospace;
+        .card h2 {
+            font-family: 'Orbitron', monospace;
             font-size: 0.85rem;
             color: var(--ice);
-            letter-spacing: 0.5px;
+            letter-spacing: 2px;
+            margin-bottom: 18px;
+            text-transform: uppercase;
         }
-        #announcementBanner.active { display: block; }
-        #announcementBanner .close-btn {
-            position: absolute;
-            right: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
+
+        label {
+            display: block;
+            font-size: 0.8rem;
             color: var(--muted);
-            font-size: 1.2rem;
-            cursor: pointer;
-            line-height: 1;
-            padding: 4px 8px;
-        }
-        #announcementBanner .close-btn:hover { color: white; }
-
-        /* MAINTENANCE OVERLAY */
-        #maintenanceOverlay {
-            position: fixed; inset: 0; z-index: 20000;
-            background: var(--void);
-            display: none;
-            align-items: center; justify-content: center;
-            flex-direction: column; text-align: center; padding: 40px;
-        }
-        #maintenanceOverlay.active { display: flex; }
-        #maintenanceOverlay h1 {
-            font-family: 'Orbitron', monospace;
-            font-size: clamp(1.8rem, 5vw, 3rem);
-            color: var(--hot);
-            margin-bottom: 20px;
-            text-shadow: 0 0 30px rgba(255,58,110,0.4);
-        }
-        #maintenanceOverlay p {
-            font-size: 1.1rem; color: var(--muted); max-width: 500px; line-height: 1.6;
+            margin-bottom: 6px;
+            letter-spacing: 1px;
         }
 
-        footer { border-top: 1px solid var(--glass-border); padding: 30px 40px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
-        .live-dot { height: 8px; width: 8px; background-color: var(--neon); border-radius: 50%; display: inline-block; animation: pulse 2s infinite; margin-right: 8px; box-shadow: 0 0 10px var(--neon); }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-
-        #downloadBubbles {
-            position: fixed; bottom: 20px; right: 20px; z-index: 9000;
-            pointer-events: none; display: flex; flex-direction: column-reverse; gap: 10px; align-items: flex-end;
-        }
-        .dl-bubble {
-            display: flex; align-items: center; gap: 10px;
-            background: rgba(4,4,10,0.92); border: 1px solid rgba(0,255,136,0.35);
-            border-radius: 14px; padding: 10px 14px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.5), 0 0 20px rgba(0,255,136,0.15);
-            animation: bubbleUp 4.5s ease-out forwards; max-width: 260px;
-        }
-        .dl-bubble img { width: 42px; height: 42px; object-fit: contain; border-radius: 8px; background: #000; }
-        .dl-bubble .emoji-thumb { font-size: 1.8rem; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; }
-        .dl-bubble .info { flex: 1; min-width: 0; }
-        .dl-bubble .title { font-family: 'Orbitron', monospace; font-size: 0.75rem; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .dl-bubble .sub { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--neon); margin-top: 2px; }
-        @keyframes bubbleUp {
-            0% { opacity: 0; transform: translateY(30px) scale(0.85); }
-            12% { opacity: 1; transform: translateY(0) scale(1); }
-            75% { opacity: 1; transform: translateY(-20px); }
-            100% { opacity: 0; transform: translateY(-60px) scale(0.9); }
-        }
-
-        @media (max-width: 960px) { .page-body { grid-template-columns: 1fr; } .sidebar { position: static; } }
-
-        #backToTop {
-            position: fixed; bottom: 24px; left: 24px; z-index: 8000;
-            width: 44px; height: 44px; border-radius: 50%;
-            background: linear-gradient(135deg, var(--neon), #00cc70); color: #000;
-            border: none; font-size: 1.2rem; cursor: pointer;
-            display: none; align-items: center; justify-content: center;
-            box-shadow: 0 6px 20px rgba(0,255,136,0.35); transition: 0.25s;
-        }
-        #backToTop.show { display: flex; }
-        #backToTop:hover { transform: scale(1.08); }
-
-        .fav-btn {
-            background: none; border: none; cursor: pointer; font-size: 1.1rem;
-            line-height: 1; padding: 2px 4px; opacity: 0.7; transition: 0.2s;
-        }
-        .fav-btn:hover, .fav-btn.on { opacity: 1; }
-        .fav-btn.on { filter: drop-shadow(0 0 6px rgba(255,58,110,0.6)); }
-
-        #gameOfDay { display: none; max-width: 720px; margin: 0 auto 28px; padding: 0 20px; }
-        #gameOfDay.active { display: block; }
-        #gameOfDay .inner {
-            background: linear-gradient(135deg, rgba(255,215,0,0.14), rgba(0,255,136,0.08));
-            border: 1px solid rgba(255,215,0,0.4); border-radius: 20px;
-            padding: 18px; display: flex; gap: 18px; align-items: center;
-            box-shadow: 0 12px 40px rgba(0,0,0,0.35), 0 0 30px rgba(255,215,0,0.08);
-        }
-        #gameOfDay .god-thumb {
-            width: 120px; height: 120px; flex-shrink: 0;
-            border-radius: 14px; overflow: hidden; background: #080810;
-            border: 1px solid rgba(255,215,0,0.25);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 2.8rem; position: relative;
-        }
-        #gameOfDay .god-thumb img {
-            width: 100%; height: 100%; object-fit: contain; background: #000;
-        }
-        #gameOfDay .god-info { flex: 1; min-width: 0; text-align: left; }
-        #gameOfDay .label {
-            font-family: 'Space Mono', monospace; font-size: 0.68rem;
-            color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;
-        }
-        #gameOfDay .name {
-            font-family: 'Orbitron', monospace; font-size: 1.25rem; color: white;
-            margin-bottom: 6px; line-height: 1.2;
-        }
-        #gameOfDay .god-meta {
-            font-family: 'Space Mono', monospace; font-size: 0.72rem;
-            color: var(--muted); margin-bottom: 14px;
-        }
-        #gameOfDay .god-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-        @media (max-width: 520px) {
-            #gameOfDay .inner { flex-direction: column; text-align: center; }
-            #gameOfDay .god-info { text-align: center; }
-            #gameOfDay .god-actions { justify-content: center; }
-        }
-
-        .action-bar {
-            display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
-            max-width: 640px; margin: 0 auto 24px; padding: 0 20px;
-        }
-        .action-bar button {
-            padding: 10px 18px; border-radius: 10px; font-family: 'Orbitron', monospace;
-            font-size: 0.7rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
-            cursor: pointer; border: 1px solid var(--glass-border); background: var(--glass); color: var(--text);
+        input[type="text"],
+        input[type="datetime-local"],
+        textarea {
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(0,0,0,0.45);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: white;
+            font-family: 'Syne', sans-serif;
+            font-size: 0.95rem;
+            margin-bottom: 14px;
             transition: 0.25s;
         }
-        .action-bar button:hover { border-color: var(--neon); color: var(--neon); }
-        .action-bar button.active-filter { border-color: var(--hot); color: var(--hot); }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--neon);
+            box-shadow: 0 0 0 3px rgba(0,255,136,0.1);
+        }
+
+        textarea { min-height: 80px; resize: vertical; }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 22px;
+            border-radius: 10px;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            border: none;
+            transition: 0.25s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--neon), #00cc70);
+            color: #000;
+        }
+        .btn-primary:hover { transform: scale(1.03); box-shadow: 0 6px 20px rgba(0,255,136,0.35); }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--hot), #cc2a55);
+            color: #fff;
+        }
+        .btn-danger:hover { transform: scale(1.03); box-shadow: 0 6px 20px rgba(255,58,110,0.35); }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--text);
+        }
+        .btn-secondary:hover { border-color: var(--ice); color: var(--ice); }
+
+        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+
+        .status {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            margin-top: 12px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            display: none;
+        }
+        .status.ok { display: block; background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); color: var(--neon); }
+        .status.err { display: block; background: rgba(255,58,110,0.1); border: 1px solid rgba(255,58,110,0.3); color: var(--hot); }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding: 12px 14px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .toggle-label { font-size: 0.9rem; }
+
+        .switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; inset: 0;
+            background: #333;
+            border-radius: 26px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .slider:before {
+            content: '';
+            position: absolute;
+            height: 20px; width: 20px;
+            left: 3px; bottom: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+        input:checked + .slider { background: var(--hot); }
+        input:checked + .slider:before { transform: translateX(24px); }
+
+        .timer-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 14px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        .timer-item .info { flex: 1; }
+        .timer-item .title { font-family: 'Orbitron'; font-size: 0.85rem; }
+        .timer-item .date { font-family: 'Space Mono'; font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+
+        .login-box {
+            max-width: 380px;
+            margin: 80px auto;
+            text-align: center;
+        }
+        .login-box input {
+            text-align: center;
+            letter-spacing: 3px;
+        }
+
+        #adminPanel { display: none; }
+        #loginScreen { display: block; }
+
+        a.back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: var(--muted);
+            font-size: 0.8rem;
+            text-decoration: none;
+            font-family: 'Space Mono', monospace;
+        }
+        a.back-link:hover { color: var(--neon); }
+
+        @media (max-width: 600px) {
+            .row { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
-<div class="grid-bg"></div>
-<div id="downloadBubbles"></div>
-<button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">↑</button>
+<div class="container">
+    <!-- LOGIN -->
+    <div id="loginScreen" class="login-box">
+        <h1>KVG ADMIN</h1>
+        <p class="subtitle">Restricted Access</p>
+        <div class="card">
+            <label>Password</label>
+            <input type="password" id="adminPass" placeholder="••••••••" onkeydown="if(event.key==='Enter') tryLogin()">
+            <button class="btn btn-primary" style="width:100%; margin-top:8px;" onclick="tryLogin()">Enter</button>
+            <div id="loginStatus" class="status"></div>
+        </div>
+    </div>
 
-<!-- Global Announcement Banner -->
-<div id="announcementBanner">
-    <span id="announcementText"></span>
-    <button class="close-btn" onclick="dismissAnnouncement()" title="Dismiss">×</button>
-</div>
-<div id="shoutoutBanner" style="display:none; position:relative; z-index:149; background:linear-gradient(90deg,rgba(255,215,0,0.18),rgba(0,255,136,0.1)); border-bottom:1px solid rgba(255,215,0,0.4); padding:12px 40px; text-align:center; font-family:Orbitron,monospace; color:var(--gold); letter-spacing:1px; font-size:0.95rem;">
-    <span id="shoutoutText"></span>
-</div>
+    <!-- ADMIN PANEL -->
+    <div id="adminPanel">
+        <a href="index.html" class="back-link">← Back to site</a>
+        <h1>KVG Admin</h1>
+        <p class="subtitle">Control panel · changes apply live</p>
 
-<!-- Maintenance Overlay -->
-<div id="maintenanceOverlay">
-    <h1 id="maintTitle">SITE OFFLINE</h1>
-    <p id="maintMsg">This platform is temporarily shut down. Please check back later.</p>
-</div>
+        <!-- SITE NAME / BRANDING -->
+        <div class="card">
+            <h2>◈ Website Name & Branding</h2>
+            <label>Full Site Name (browser tab)</label>
+            <input type="text" id="cfgSiteName" placeholder="Keith Valley Games">
 
-<div class="modal-overlay" id="downloadModal">
-    <div class="modal-content">
-        <h2 style="color:var(--neon); font-family:'Orbitron'; margin-bottom:15px; font-size:1.2rem; letter-spacing: 1px;">Important Message</h2>
-        <div style="color:white; line-height:1.6; font-size:0.9rem;">
-            <ol style="padding-left:20px; margin-bottom:15px;">
-                <li style="margin-bottom: 8px;">Click download on which game you want.</li>
-                <li style="margin-bottom: 8px;">Wait for your file to finish downloading.</li>
-                <li style="margin-bottom: 8px;">Once done double click on the file in your download tab.</li>
-                <li style="margin-bottom: 8px;">Go to your downloads in file explorer and left click on the file for the game.</li>
-                <li style="margin-bottom: 8px;">Click extract all.</li>
-                <li>Open the new extracted file and open it up until you see the application file inside it.</li>
-            </ol>
-            <div style="background:rgba(0,180,255,0.1); border-left:3px solid var(--ice); padding:12px; font-size:0.85rem; color:var(--ice);">
-                <strong>7. OPTIONAL BUT USEFUL:</strong> Drag the application file to your task bar or wallpaper to get easy access to it instead of going to the file every time over and over.
+            <div class="row">
+                <div>
+                    <label>Logo Text (top bar)</label>
+                    <input type="text" id="cfgLogoText" placeholder="KVG ◈">
+                </div>
+                <div>
+                    <label>Footer Year</label>
+                    <input type="text" id="cfgFooterYear" placeholder="2025">
+                </div>
             </div>
-            <p style="margin-top:15px; color:var(--neon); text-align:center; font-weight:bold; font-size:1.1rem;">8. Have fun!</p>
-        </div>
-        <button class="btn-play btn-download" style="width:100%; margin-top:20px; padding:15px;" onclick="closeModal()">Got it, Start Download</button>
-    </div>
-</div>
 
-<nav class="topbar">
-    <div class="topbar-logo" id="siteLogo">KVG ◈</div>
-</nav>
-
-<section class="hero">
-    <div class="hero-eyebrow" id="heroEyebrow">Est. by Bizbobotwitch</div>
-    <h1>
-        <span class="line1" id="heroLine1">Keith Valley</span>
-        <span class="line2" id="heroLine2">Games</span>
-    </h1>
-
-    <div class="stats-bar">
-        <div class="stat-item"><span class="stat-num" id="stat-web-count">14</span><span class="stat-lbl">Web Games</span></div>
-        <div class="stat-item"><span class="stat-num" id="stat-games">0</span><span class="stat-lbl">Total Games</span></div>
-    </div>
-
-    <div id="launchCountdown" style="display:none; max-width:560px; margin:28px auto 0; padding:20px 24px; background:linear-gradient(135deg,rgba(0,255,136,0.1),rgba(0,180,255,0.08)); border:1px solid rgba(0,255,136,0.35); border-radius:16px;">
-        <div style="font-family:'Space Mono',monospace; font-size:0.7rem; color:var(--neon); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px;">◈ Launching Soon</div>
-        <div id="launchGameName" style="font-family:'Orbitron',monospace; font-size:1.2rem; color:white; margin-bottom:12px;">—</div>
-        <div id="launchTimer" style="font-family:'Orbitron',monospace; font-size:clamp(1.4rem,4vw,2rem); color:var(--gold); letter-spacing:2px;">--:--:--:--</div>
-    </div>
-</section>
-
-<div id="gameOfDay">
-    <div class="inner">
-        <div class="god-thumb" id="gameOfDayThumb">🎮</div>
-        <div class="god-info">
-            <div class="label">◈ Game of the Day</div>
-            <div class="name" id="gameOfDayName">—</div>
-            <div class="god-meta" id="gameOfDayMeta"></div>
-            <div class="god-actions" id="gameOfDayActions"></div>
-        </div>
-    </div>
-</div>
-
-<div class="search-wrap">
-    <span class="search-icon">⌕</span>
-    <input type="text" id="searchInput" placeholder="Search games…" oninput="filterGames()">
-</div>
-
-<div class="action-bar">
-    <button type="button" onclick="playRandomDownloadable()">Random Download</button>
-    <button type="button" onclick="playRandomWeb()">Random Web Game</button>
-    <button type="button" id="favFilterBtn" onclick="toggleFavFilter()">♥ Favorites</button>
-</div>
-
-<div class="page-body">
-    <div class="content-area">
-        <div class="tabs">
-            <button class="tab active" onclick="switchTab(0)">Downloadable</button>
-            <button class="tab" onclick="switchTab(1)">Web Games</button>
-        </div>
-        <div id="download-section"><div id="download-list" class="game-grid"></div></div>
-        <div id="web-section" style="display:none"><div id="web-games-list" class="game-grid"></div></div>
-    </div>
-
-    <aside>
-        <div class="side-card" id="sidebarTimersCard" style="background:var(--glass); border:1px solid var(--glass-border); padding:24px; border-radius:20px; margin-bottom: 20px; display:none;">
-            <h3 style="font-family:'Orbitron'; font-size:0.75rem; color:var(--ice); margin-bottom:15px; letter-spacing: 2px;">◈ ACTIVE TIMERS</h3>
-            <div id="sidebarTimersList" style="display:flex; flex-direction:column; gap:10px;"></div>
-        </div>
-
-        <div style="background:var(--glass); border:1px solid var(--glass-border); padding:24px; border-radius:20px; margin-bottom:20px;">
-            <h3 style="font-family:'Orbitron'; font-size:0.75rem; color:var(--hot); margin-bottom:15px; letter-spacing: 2px;">◈ HOT RIGHT NOW</h3>
-            <div id="hotList" style="font-family:'Space Mono'; font-size:0.78rem; color:var(--muted);">Loading…</div>
-        </div>
-
-        <div id="pollBox" style="display:none; background:var(--glass); border:1px solid var(--glass-border); padding:24px; border-radius:20px; margin-bottom:20px;">
-            <h3 style="font-family:'Orbitron'; font-size:0.75rem; color:var(--gold); margin-bottom:10px; letter-spacing: 2px;">◈ POLL</h3>
-            <div id="pollQuestion" style="font-family:Syne,sans-serif; color:white; margin-bottom:12px; font-size:0.95rem;"></div>
-            <div id="pollOptions" style="display:flex; flex-direction:column; gap:8px;"></div>
-            <p id="pollStatus" style="font-family:'Space Mono'; font-size:0.7rem; color:var(--muted); margin-top:10px;"></p>
-        </div>
-
-        <div style="background:var(--glass); border:1px solid var(--glass-border); padding:24px; border-radius:20px; margin-bottom:20px;">
-            <h3 style="font-family:'Orbitron'; font-size:0.75rem; color:var(--muted); margin-bottom:15px; letter-spacing: 2px;">◈ UP AND COMING</h3>
-            <div id="upcomingList"></div>
-            <p id="upcomingEmpty" style="font-family:'Space Mono'; font-size:0.8rem; color:var(--muted); margin-bottom:12px;">Nothing queued yet.</p>
-            <button onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSe80XYsgWB4CxQ3zJVvwPr8shd9qOp-nfbKy7AWFJa6Hk3Kvg/viewform', '_blank')" 
-                    class="btn-play" style="width:100%; margin-top:5px; background:transparent; border:1px solid var(--neon); color:var(--neon); cursor:pointer;">
-                Suggest a Game
-            </button>
-        </div>
-
-        <div style="background:var(--glass); border:1px solid var(--glass-border); padding:24px; border-radius:20px; margin-bottom:20px;">
-            <h3 style="font-family:'Orbitron'; font-size:0.75rem; color:var(--ice); margin-bottom:12px; letter-spacing: 2px;">◈ CHAT</h3>
-            <p style="font-family:'Space Mono'; font-size:0.75rem; color:var(--muted); margin-bottom:12px;">Hang out with other visitors in the live room.</p>
-            <button type="button" class="btn-play" style="width:100%; background:linear-gradient(135deg,var(--ice),#007fd4); color:#fff; border:none; cursor:pointer; padding:12px;" onclick="openChatRoom()">Open Chatroom</button>
-        </div>
-
-        <div id="changelogBox" style="display:none; background:var(--glass); border:1px solid var(--glass-border); padding:24px; border-radius:20px;">
-            <h3 style="font-family:'Orbitron'; font-size:0.75rem; color:var(--ice); margin-bottom:12px; letter-spacing: 2px;">◈ WHAT'S NEW</h3>
-            <pre id="changelogText" style="font-family:'Space Mono'; font-size:0.75rem; color:var(--text); white-space:pre-wrap; line-height:1.5; margin:0;"></pre>
-        </div>
-    </aside>
-
-    </div>
-
-<!-- Live Chatroom sub-page -->
-<div id="chatRoom" style="display:none; position:fixed; inset:0; z-index:35000; background:var(--void); flex-direction:column;">
-    <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-bottom:1px solid var(--glass-border); background:rgba(4,4,10,0.92); backdrop-filter:blur(12px);">
-        <div>
-            <div style="font-family:'Orbitron',monospace; color:var(--neon); letter-spacing:2px; font-size:0.95rem;">◈ KVG CHAT</div>
-            <div style="font-family:'Space Mono',monospace; font-size:0.65rem; color:var(--muted); margin-top:2px;"><span class="live-dot"></span>Live room</div>
-        </div>
-        <button type="button" onclick="closeChatRoom()" style="background:rgba(255,255,255,0.06); border:1px solid var(--glass-border); color:var(--text); border-radius:10px; padding:8px 14px; cursor:pointer; font-family:'Orbitron',monospace; font-size:0.7rem;">Close</button>
-    </div>
-    <div id="chatMessages" style="flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:12px; max-width:720px; width:100%; margin:0 auto;"></div>
-    <div style="border-top:1px solid var(--glass-border); padding:14px 20px; background:rgba(4,4,10,0.95);">
-        <div style="max-width:720px; margin:0 auto; display:flex; flex-direction:column; gap:8px;">
-            <input type="text" id="chatName" placeholder="Your name" maxlength="20" style="width:100%; padding:10px 14px; background:rgba(0,0,0,0.45); border:1px solid var(--glass-border); border-radius:10px; color:white; font-family:Syne,sans-serif;">
-            <div style="display:flex; gap:8px;">
-                <input type="text" id="chatMsg" placeholder="Say something…" maxlength="200" style="flex:1; padding:12px 14px; background:rgba(0,0,0,0.45); border:1px solid var(--glass-border); border-radius:10px; color:white; font-family:Syne,sans-serif;" onkeydown="if(event.key==='Enter')sendChat()">
-                <button type="button" class="btn-play btn-download" style="padding:12px 20px;" onclick="sendChat()">Send</button>
+            <div class="row">
+                <div>
+                    <label>Hero Line 1</label>
+                    <input type="text" id="cfgHeroLine1" placeholder="Keith Valley">
+                </div>
+                <div>
+                    <label>Hero Line 2</label>
+                    <input type="text" id="cfgHeroLine2" placeholder="Games">
+                </div>
             </div>
-            <p id="chatStatus" style="font-family:'Space Mono',monospace; font-size:0.7rem; color:var(--muted); margin:0;"></p>
+
+            <label>Hero Eyebrow (small text above title)</label>
+            <input type="text" id="cfgHeroEyebrow" placeholder="Est. by Bizbobotwitch">
+
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="saveBranding()">Save Branding</button>
+            </div>
+            <div id="brandStatus" class="status"></div>
+        </div>
+
+        <!-- MAINTENANCE / SHUTDOWN -->
+        <div class="card">
+            <h2>◈ Shutdown / Maintenance Mode</h2>
+            <div class="toggle-row">
+                <span class="toggle-label">Site Offline (maintenance mode)</span>
+                <label class="switch">
+                    <input type="checkbox" id="cfgMaintenance">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <label>Maintenance Title</label>
+            <input type="text" id="cfgMaintTitle" placeholder="SITE OFFLINE">
+
+            <label>Maintenance Message</label>
+            <textarea id="cfgMaintMsg" placeholder="This platform is temporarily shut down. Please check back later."></textarea>
+
+            <label>Schedule maintenance (auto-offline at this local time)</label>
+            <input type="datetime-local" id="cfgScheduledMaint">
+
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="saveMaintenance()">Save Maintenance Settings</button>
+                <button class="btn btn-secondary" onclick="clearScheduledMaint()">Clear Schedule</button>
+            </div>
+            <div id="maintStatus" class="status"></div>
+        </div>
+
+        <!-- TIMERS / COUNTDOWNS -->
+        <div class="card">
+            <h2>◈ Active Timers / Countdowns</h2>
+            <div id="timersList"></div>
+
+            <hr style="border:none; border-top:1px solid var(--glass-border); margin:18px 0;">
+
+            <label>New Timer Title</label>
+            <input type="text" id="newTimerTitle" placeholder="e.g. New Game Drop">
+
+            <label>Target Date & Time</label>
+            <input type="datetime-local" id="newTimerDate">
+
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="addTimer()">Add Timer</button>
+            </div>
+            <div id="timerStatus" class="status"></div>
+        </div>
+
+        <!-- UP AND COMING -->
+        <div class="card">
+            <h2>◈ Up and Coming Games</h2>
+            <div id="upcomingAdminList"></div>
+
+            <hr style="border:none; border-top:1px solid var(--glass-border); margin:18px 0;">
+
+            <label>Game Title</label>
+            <input type="text" id="newUpcomingTitle" placeholder="e.g. Binding of Isaac">
+
+            <label>Status Badge (optional)</label>
+            <input type="text" id="newUpcomingStatus" placeholder="QUEUED" value="QUEUED">
+
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="addUpcoming()">Add Game</button>
+            </div>
+            <div id="upcomingStatus" class="status"></div>
+        </div>
+
+        <!-- CUSTOM WEB GAMES -->
+        <div class="card">
+            <h2>◈ Web Games (add your own)</h2>
+            <p style="font-size:0.8rem;color:var(--muted);margin-bottom:12px;">These appear in the Web Games tab on the main site (in addition to the built-in list).</p>
+            <div id="webGamesAdminList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;max-height:240px;overflow-y:auto;"></div>
+            <label>Title</label>
+            <input type="text" id="newWebTitle" placeholder="My Cool Game">
+            <label>URL (https://…)</label>
+            <input type="text" id="newWebUrl" placeholder="https://example.com/game">
+            <div class="row">
+                <div>
+                    <label>Emoji / icon</label>
+                    <input type="text" id="newWebThumb" placeholder="🎮" value="🎮">
+                </div>
+                <div>
+                    <label>Tag</label>
+                    <input type="text" id="newWebTag" placeholder="ARCADE" value="WEB">
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="addWebGame()">Add Web Game</button>
+            </div>
+            <div id="webGamesStatus" class="status"></div>
+        </div>
+
+        <!-- GLOBAL ANNOUNCEMENT -->
+        <div class="card">
+            <h2>◈ Global Announcement</h2>
+            <div class="toggle-row">
+                <span class="toggle-label">Show announcement banner</span>
+                <label class="switch">
+                    <input type="checkbox" id="cfgAnnouncementEnabled">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <label>Announcement Message</label>
+            <textarea id="cfgAnnouncementMsg" placeholder="e.g. New games added! Check the downloadable tab."></textarea>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="saveAnnouncement()">Save Announcement</button>
+            </div>
+            <div id="announceStatus" class="status"></div>
+        </div>
+
+        <!-- GLOBAL REFRESH -->
+        <div class="card">
+            <h2>◈ Global Refresh</h2>
+            <p style="font-size:0.85rem; color:var(--muted); margin-bottom:14px; line-height:1.5;">
+                Force every visitor currently on the site to instantly reload the page. Useful after big updates.
+            </p>
+            <div class="btn-group">
+                <button class="btn btn-danger" onclick="forceGlobalRefresh()">Force Global Refresh Now</button>
+            </div>
+            <div id="refreshStatus" class="status"></div>
+        </div>
+
+        <!-- FEATURED / GAME PICKER -->
+        <div class="card">
+            <h2>◈ Featured Games (easy pick)</h2>
+            <p style="font-size:0.8rem;color:var(--muted);margin-bottom:12px;">Click games below to toggle featured. Multiple allowed. They pin to the top with a gold badge.</p>
+            <div id="featuredPicker" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;max-height:180px;overflow-y:auto;"></div>
+            <label>Or type titles (comma-separated)</label>
+            <input type="text" id="cfgFeaturedGame" placeholder="Game A, Game B">
+            <label>Game of the Day</label>
+            <select id="cfgGameOfTheDaySelect" style="width:100%;padding:12px 14px;background:rgba(0,0,0,0.45);border:1px solid var(--glass-border);border-radius:10px;color:white;font-family:Syne,sans-serif;font-size:0.95rem;margin-bottom:10px;">
+                <option value="">— None —</option>
+            </select>
+            <input type="text" id="cfgGameOfTheDay" placeholder="Or type exact title" style="margin-bottom:14px;">
+            <label>NEW badge games (click to toggle)</label>
+            <div id="newGamesPicker" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;max-height:140px;overflow-y:auto;"></div>
+            <input type="text" id="cfgNewGames" placeholder="Or type: Game A, Game B">
+            <label>Hidden games (click to hide from site)</label>
+            <div id="hiddenGamesPicker" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;max-height:140px;overflow-y:auto;"></div>
+            <input type="text" id="cfgHiddenGames" placeholder="Or type titles to hide">
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="saveFeaturedStuff()">Save Featured / New / Hidden</button>
+                <button class="btn btn-secondary" onclick="loadGameList()">Refresh Game List</button>
+            </div>
+            <div id="featuredStatus" class="status"></div>
+        </div>
+
+        <!-- EXTRAS -->
+        <div class="card">
+            <h2>◈ Colors / Tip / Changelog</h2>
+            <div class="row">
+                <div><label>Neon Color</label><input type="text" id="cfgAccentNeon" placeholder="#00ff88"></div>
+                <div><label>Ice Color</label><input type="text" id="cfgAccentIce" placeholder="#00b4ff"></div>
+            </div>
+            <label>Theme presets</label>
+            <div class="btn-group" style="margin-bottom:14px;">
+                <button class="btn btn-secondary" type="button" onclick="applyThemePreset('neon')">Neon Green</button>
+                <button class="btn btn-secondary" type="button" onclick="applyThemePreset('purple')">Purple</button>
+                <button class="btn btn-secondary" type="button" onclick="applyThemePreset('red')">Hot Red</button>
+                <button class="btn btn-secondary" type="button" onclick="applyThemePreset('gold')">Gold</button>
+                <button class="btn btn-secondary" type="button" onclick="applyThemePreset('ice')">Ice Blue</button>
+            </div>
+            <label>Footer Tip</label>
+            <input type="text" id="cfgFooterTip" placeholder="Have fun out there">
+            <label>Changelog</label>
+            <textarea id="cfgChangelog" placeholder="- Added games&#10;- Fixes"></textarea>
+            <label>Announcement auto-hide (hours, 0 = never)</label>
+            <input type="text" id="cfgAnnounceHideHours" placeholder="24">
+            <label>Staff note (only visible in admin)</label>
+            <textarea id="cfgStaffNote" placeholder="Private notes to yourself…"></textarea>
+            <div class="toggle-row">
+                <span class="toggle-label">Download bubble sound</span>
+                <label class="switch"><input type="checkbox" id="cfgBubbleSound" checked><span class="slider"></span></label>
+            </div>
+            <div class="toggle-row">
+                <span class="toggle-label">Show stats bar on homepage</span>
+                <label class="switch"><input type="checkbox" id="cfgShowStats" checked><span class="slider"></span></label>
+            </div>
+            <div class="btn-group"><button class="btn btn-primary" onclick="saveExtras()">Save Extras</button></div>
+            <div id="extrasStatus" class="status"></div>
+        </div>
+
+        <div class="card">
+            <h2>◈ Broadcast Popup</h2>
+            <p style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;">Shows once to visitors online within 10 minutes. Not forever.</p>
+            <label>Message shown to every visitor</label>
+            <textarea id="cfgBroadcastMsg" placeholder="Server restart in 5 min!"></textarea>
+            <div class="btn-group">
+                <button class="btn btn-danger" onclick="sendBroadcast()">Send Broadcast Now</button>
+                <button class="btn btn-secondary" onclick="clearBroadcast()">Clear Broadcast</button>
+            </div>
+            <div id="broadcastStatus" class="status"></div>
+        </div>
+
+        <!-- LIVE ACTIVITY -->
+        <div class="card">
+            <h2>◈ Live Activity</h2>
+            <div style="display:flex; gap:20px; margin-bottom:16px; flex-wrap:wrap;">
+                <div style="background:rgba(0,0,0,0.3); border:1px solid var(--glass-border); border-radius:10px; padding:14px 18px; flex:1; min-width:120px; text-align:center;">
+                    <div style="font-family:'Orbitron'; font-size:1.6rem; color:var(--neon);" id="adminOnlineCount">—</div>
+                    <div style="font-size:0.7rem; color:var(--muted); letter-spacing:1px; margin-top:4px;">ONLINE NOW</div>
+                </div>
+                <div style="background:rgba(0,0,0,0.3); border:1px solid var(--glass-border); border-radius:10px; padding:14px 18px; flex:1; min-width:120px; text-align:center;">
+                    <div style="font-family:'Orbitron'; font-size:1.6rem; color:var(--ice);" id="adminDownloadCount">—</div>
+                    <div style="font-size:0.7rem; color:var(--muted); letter-spacing:1px; margin-top:4px;">TOTAL DOWNLOADS</div>
+                </div>
+            </div>
+            <h3 style="font-family:'Orbitron'; font-size:0.7rem; color:var(--muted); letter-spacing:2px; margin-bottom:10px;">RECENT DOWNLOADS</h3>
+            <div id="adminRecentDownloads" style="max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin:18px 0 10px;">
+                <h3 style="font-family:'Orbitron'; font-size:0.75rem; color:var(--hot); letter-spacing:2px; margin:0;">⚠ BROKEN GAME REPORTS <span id="reportCountBadge" style="background:var(--hot);color:#fff;border-radius:999px;padding:2px 8px;font-size:0.65rem;margin-left:6px;display:none;">0</span></h3>
+                <button type="button" class="btn btn-danger" style="padding:6px 12px; font-size:0.65rem;" onclick="clearAllReports()">Clear All Reports</button>
+            </div>
+            <div id="adminReportsList" style="max-height:200px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; margin-bottom:4px;"></div>
+            <h3 style="font-family:'Orbitron'; font-size:0.7rem; color:var(--muted); letter-spacing:2px; margin:16px 0 10px;">ACTIVITY LOG</h3>
+            <div id="adminActivityLog" style="max-height:160px; overflow-y:auto; font-family:'Space Mono'; font-size:0.7rem; color:var(--muted);"></div>
+        </div>
+
+        <!-- LAUNCH COUNTDOWN -->
+        <div class="card">
+            <h2>◈ Launch Countdown</h2>
+            <label>Game name</label>
+            <input type="text" id="cfgLaunchGame" placeholder="New Game Title">
+            <label>Launch time</label>
+            <input type="datetime-local" id="cfgLaunchAt">
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="saveLaunch()">Save Launch Countdown</button>
+                <button class="btn btn-secondary" onclick="clearLaunch()">Clear</button>
+            </div>
+            <div id="launchStatus" class="status"></div>
+        </div>
+
+        <!-- GUESTBOOK MODERATION -->
+        <div class="card">
+            <h2>◈ Chat Room (moderation)</h2>
+            <p style="font-size:0.8rem;color:var(--muted);margin-bottom:12px;">Live chat messages. Delete spam anytime.</p>
+            <div id="guestbookAdminList" style="max-height:280px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
+            <div class="btn-group" style="margin-top:10px;">
+                <button class="btn btn-danger" onclick="clearAllChat()">Clear All Chat</button>
+            </div>
+            <div id="guestbookAdminStatus" class="status"></div>
+        </div>
+
+        <!-- QUICK ACTIONS -->
+        <div class="card">
+            <h2>◈ Quick Actions</h2>
+            <div class="btn-group">
+                <button class="btn btn-danger" onclick="forceShutdown()">Force Shutdown Now</button>
+                <button class="btn btn-secondary" onclick="forceGlobalRefresh()">Force Global Refresh</button>
+                <button class="btn btn-secondary" onclick="clearAllTimers()">Clear All Timers</button>
+                <button class="btn btn-secondary" onclick="resetBranding()">Reset Branding</button>
+                <button class="btn btn-secondary" onclick="exportDownloadsCSV()">Export Downloads CSV</button>
+                <button class="btn btn-secondary" onclick="exportConfigJSON()">Export Config JSON</button>
+                <button class="btn btn-danger" onclick="resetLiveData()">Reset Live Data</button>
+                <button class="btn btn-secondary" onclick="clearAnnouncement()">Clear Announcement</button>
+                <button class="btn btn-primary" onclick="throwConfetti()">🎉 Throw Confetti</button>
+                <button class="btn btn-secondary" onclick="simulateDownload()">Simulate Download Bubble</button>
+            </div>
+            <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; align-items:end;">
+                <div style="flex:1; min-width:120px;">
+                    <label>Gabe Mode seconds</label>
+                    <input type="number" id="cfgGabeSeconds" value="10" min="1" max="300">
+                </div>
+                <button class="btn btn-secondary" type="button" onclick="triggerGabeMode()">🐸 Gabe Mode</button>
+            </div>
+            <div style="margin-top:14px;">
+                <label>Shoutout (shows for 1 minute)</label>
+                <input type="text" id="cfgShoutout" placeholder="Welcome back, Biz!">
+                <div class="btn-group">
+                    <button class="btn btn-primary" type="button" onclick="sendShoutout()">Send Shoutout</button>
+                </div>
+            </div>
+            <div class="toggle-row" style="margin-top:14px;">
+                <span class="toggle-label">Freeze all downloads</span>
+                <label class="switch"><input type="checkbox" id="cfgFreezeDownloads" onchange="toggleFreezeDownloads()"><span class="slider"></span></label>
+            </div>
+            <div style="margin-top:14px;">
+                <label>Poll question</label>
+                <input type="text" id="cfgPollQuestion" placeholder="Next game should be…">
+                <label>Poll options (comma-separated, min 2)</label>
+                <input type="text" id="cfgPollOptions" placeholder="Horror, Racing, Indie">
+                <div class="btn-group">
+                    <button class="btn btn-primary" type="button" onclick="savePoll()">Save / Start Poll</button>
+                    <button class="btn btn-secondary" type="button" onclick="clearPoll()">Clear Poll</button>
+                </div>
+            </div>
+            <div id="quickStatus" class="status"></div>
+            <div id="staffNoteDisplay" style="margin-top:14px;padding:12px;background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:10px;font-size:0.85rem;color:var(--gold);display:none;"></div>
         </div>
     </div>
 </div>
 
-<!-- Konami secret page -->
-<div id="secretPage" style="display:none; position:fixed; inset:0; z-index:40000; background:rgba(4,4,10,0.96); align-items:center; justify-content:center; flex-direction:column; padding:30px; text-align:center;">
-    <div style="font-family:'Orbitron',monospace; font-size:clamp(1.5rem,5vw,2.5rem); color:var(--neon); margin-bottom:12px; text-shadow:0 0 30px rgba(0,255,136,0.4);">◈ KVG VAULT</div>
-    <p style="color:var(--muted); max-width:420px; line-height:1.6; margin-bottom:20px;">You found the secret page. Stay weird. Stay downloading.</p>
-    <div style="font-size:3rem; margin-bottom:20px;">👾🎮✨</div>
-    <button type="button" class="btn-play btn-download" style="padding:12px 28px;" onclick="document.getElementById('secretPage').style.display='none'">Close Vault</button>
-</div>
-
-<footer>
-    <div>
-        <div class="footer-logo" id="footerLogo" style="font-family:'Orbitron'; letter-spacing:2px; color:var(--muted); font-size:0.8rem;">KVG ◈ 2025</div>
-        <div id="footerTip" style="font-family:'Space Mono'; font-size:0.7rem; color:var(--muted); margin-top:6px; max-width:320px;"></div>
-    </div>
-    <div style="font-family:'Space Mono'; font-size:0.75rem; color:var(--muted); display:flex; gap:20px; flex-wrap:wrap;">
-        <span><span class="live-dot"></span>LIVE: <span id="real-live-count" style="color:var(--neon)">1</span></span>
-        <span>DOWNLOADS: <span id="total-downloads" style="color:var(--ice)">0</span></span>
-    </div>
-</footer>
+<div id="downloadBubbles" style="position:fixed; bottom:20px; right:20px; z-index:9000; pointer-events:none; display:flex; flex-direction:column-reverse; gap:10px; align-items:flex-end;"></div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getDatabase, ref, onValue, push, set, onDisconnect, remove, get, update, query, limitToLast, orderByChild } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+    import { getDatabase, ref, onValue, set, update, remove, push, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDVguqqS3Izk_p64ECsc4lig8V639VtFeA",
@@ -542,1021 +612,849 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    window._db = db;
-    window._fb = { push, set, remove, update, get, ref };
 
-    // Timers
-    const timersRef = ref(db, 'timers');
-    onValue(timersRef, (snapshot) => {
-        const data = snapshot.val();
-        window.siteTimers = [];
-        if (data) {
-            Object.values(data).forEach(t => {
-                if (t.title && t.targetDate) window.siteTimers.push(t);
-            });
+    // Simple password (change this!)
+    const ADMIN_PASSWORD = "3717";
+
+    window.tryLogin = function() {
+        const pass = document.getElementById('adminPass').value;
+        const status = document.getElementById('loginStatus');
+        if (pass === ADMIN_PASSWORD) {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+            loadConfig();
+            loadTimers();
+            loadUpcoming();
+            loadLiveActivity();
+            loadGameList();
+            loadGuestbookAdmin();
+            loadWebGamesAdmin();
+        } else {
+            status.textContent = "Wrong password";
+            status.className = "status err";
         }
-        window.renderTimers();
-    });
-
-    // Site Config
-    const configRef = ref(db, 'siteConfig');
-    onValue(configRef, (snapshot) => {
-        const cfg = snapshot.val() || {};
-        applySiteConfig(cfg);
-    });
-
-    // Up and Coming
-    const upcomingRef = ref(db, 'upcoming');
-    onValue(upcomingRef, (snapshot) => {
-        const data = snapshot.val();
-        window.upcomingGames = [];
-        if (data) {
-            Object.values(data).forEach(item => {
-                if (item && item.title) window.upcomingGames.push(item);
-            });
-        }
-        window.renderUpcoming();
-    });
-
-    // Presence (online users)
-    const sessionId = 's_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
-    const myPresenceRef = ref(db, 'presence/' + sessionId);
-    set(myPresenceRef, { online: true, joined: Date.now() });
-    onDisconnect(myPresenceRef).remove();
-
-    onValue(ref(db, 'presence'), (snap) => {
-        const data = snap.val() || {};
-        const count = Object.keys(data).length;
-        const el = document.getElementById('real-live-count');
-        if (el) el.textContent = Math.max(1, count);
-    });
-
-    // Live downloads (bubbles + counter)
-    let lastSeenDownloadKey = null;
-    let downloadCount = 0;
-    onValue(ref(db, 'downloadCount'), (snap) => {
-        downloadCount = snap.val() || 0;
-        const el = document.getElementById('total-downloads');
-        if (el) el.textContent = downloadCount;
-    });
-
-    onValue(query(ref(db, 'downloads'), orderByChild('ts'), limitToLast(80)), (snap) => {
-        const data = snap.val() || {};
-        const entries = Object.entries(data).sort((a,b) => (a[1].ts||0) - (b[1].ts||0));
-        // Hot right now — last hour top 3
-        const hourAgo = Date.now() - 3600000;
-        const counts = {};
-        Object.values(data).forEach(item => {
-            if ((item.ts || 0) >= hourAgo) {
-                const t = item.title || 'Game';
-                counts[t] = (counts[t] || 0) + 1;
-            }
-        });
-        const hot = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 3);
-        const hotEl = document.getElementById('hotList');
-        if (hotEl) {
-            if (!hot.length) hotEl.innerHTML = '<span style="color:var(--muted)">No downloads in the last hour.</span>';
-            else hotEl.innerHTML = hot.map(([title, n], i) =>
-                `<div style="display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--glass-border);">
-                    <span style="color:white;">${i+1}. ${title}</span>
-                    <span style="color:var(--hot);">${n}</span>
-                </div>`
-            ).join('');
-        }
-
-        if (lastSeenDownloadKey === null) {
-            if (entries.length) lastSeenDownloadKey = entries[entries.length-1][0];
-            return;
-        }
-        for (const [key, item] of entries) {
-            if (key === lastSeenDownloadKey) continue;
-            const lastTs = data[lastSeenDownloadKey] ? data[lastSeenDownloadKey].ts : 0;
-            if ((item.ts||0) > lastTs) {
-                window.spawnDownloadBubble(item);
-            }
-        }
-        if (entries.length) lastSeenDownloadKey = entries[entries.length-1][0];
-    });
-
-    // Live poll vote updates
-    onValue(ref(db, 'pollVotes'), (snap) => {
-        if (typeof renderPoll === 'function' && window._siteCfg) renderPoll(window._siteCfg);
-    });
-
-    // Live chat messages (guestbook path = chat)
-    onValue(ref(db, 'guestbook'), (snap) => {
-        const data = snap.val() || {};
-        const msgs = Object.values(data)
-            .filter(e => e && e.msg)
-            .sort((a,b) => (a.ts||0) - (b.ts||0))
-            .slice(-100);
-        const el = document.getElementById('chatMessages');
-        if (!el) return;
-        if (!msgs.length) {
-            el.innerHTML = '<div style="color:var(--muted);font-family:Space Mono,monospace;font-size:0.8rem;text-align:center;margin-top:40px;">No messages yet — say hi!</div>';
-            return;
-        }
-        const myName = (localStorage.getItem('kvg_chat_name') || '').toLowerCase();
-        el.innerHTML = msgs.map(e => {
-            const name = (e.name || 'Anon').replace(/</g,'&lt;');
-            const msg = (e.msg || '').replace(/</g,'&lt;');
-            const mine = myName && name.toLowerCase() === myName;
-            const time = e.ts ? new Date(e.ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
-            return `<div style="align-self:${mine ? 'flex-end' : 'flex-start'}; max-width:85%;">
-                <div style="font-family:Space Mono,monospace; font-size:0.65rem; color:var(--muted); margin-bottom:3px; text-align:${mine ? 'right' : 'left'};">${name} · ${time}</div>
-                <div style="padding:10px 14px; border-radius:14px; line-height:1.4; font-size:0.9rem;
-                    background:${mine ? 'rgba(0,255,136,0.15)' : 'rgba(255,255,255,0.06)'};
-                    border:1px solid ${mine ? 'rgba(0,255,136,0.3)' : 'var(--glass-border)'};
-                    color:var(--text);">${msg}</div>
-            </div>`;
-        }).join('');
-        el.scrollTop = el.scrollHeight;
-    });
-
-    window.logDownload = async function(title, thumb) {
-        try {
-            const t = title || 'Game';
-            await push(ref(db, 'downloads'), { title: t, thumb: thumb || null, ts: Date.now() });
-            const countRef = ref(db, 'downloadCount');
-            const snap = await get(countRef);
-            const newTotal = (snap.val() || 0) + 1;
-            await set(countRef, newTotal);
-            // per-game count
-            const safe = t.replace(/[.#$\/\[\]]/g, '_');
-            const gRef = ref(db, 'gameDownloads/' + safe);
-            const gSnap = await get(gRef);
-            await set(gRef, (gSnap.val() || 0) + 1);
-            // milestones
-            if ([100,250,500,1000,2500,5000].includes(newTotal) && typeof fireConfetti === 'function') fireConfetti();
-            // activity log
-            await push(ref(db, 'activityLog'), { type: 'download', title: t, ts: Date.now() });
-        } catch(e) { console.error(e); }
     };
 
-    // live per-game counts
-    onValue(ref(db, 'gameDownloads'), (snap) => {
-        window.gameDownloadCounts = snap.val() || {};
-        if (typeof renderDownloadableGames === 'function') renderDownloadableGames();
-    });
+    function showStatus(id, msg, ok = true) {
+        const el = document.getElementById(id);
+        el.textContent = msg;
+        el.className = "status " + (ok ? "ok" : "err");
+        setTimeout(() => { el.className = "status"; }, 3500);
+    }
 
-    // Custom web games from admin
-    onValue(ref(db, 'customWebGames'), (snap) => {
-        const data = snap.val() || {};
-        window.customWebGames = Object.entries(data).map(([key, g]) => ({ key, ...g }));
-        if (typeof window.rebuildWebGames === 'function') window.rebuildWebGames();
-    });
-</script>
-
-<script>
-    window.siteTimers = [];
-    window.upcomingGames = [];
-    let downloadableGames = [];
-    let pendingUrl = null;
-
-    let lastRefreshToken = null;
-    let announcementDismissed = false;
-
-    window.renderUpcoming = function() {
-        const list = document.getElementById('upcomingList');
-        const empty = document.getElementById('upcomingEmpty');
-        if (!window.upcomingGames || window.upcomingGames.length === 0) {
-            list.innerHTML = '';
-            empty.style.display = 'block';
-            return;
-        }
-        empty.style.display = 'none';
-        list.innerHTML = window.upcomingGames.map(g => `
-            <div style="font-family:'Space Mono'; font-size:0.8rem; color:white; background:rgba(255,255,255,0.03); padding:10px 14px; border-radius:8px; margin-bottom:10px; border:1px solid var(--glass-border);">
-                ${g.title}
-                <span style="float:right; color:var(--gold); font-size:0.65rem; border:1px solid rgba(255,215,0,0.3); padding:2px 6px; border-radius:4px;">${g.status || 'QUEUED'}</span>
-            </div>
-        `).join('');
-    };
-
-    window._siteCfg = {};
-    window.gameDownloadCounts = {};
-    window.bubbleSoundEnabled = true;
-
-    function applySiteConfig(cfg) {
-        window._siteCfg = cfg || {};
-        const siteName = cfg.siteName || "Keith Valley Games";
-        const logoText = cfg.logoText || "KVG ◈";
-        const line1 = cfg.heroLine1 || "Keith Valley";
-        const line2 = cfg.heroLine2 || "Games";
-        const eyebrow = cfg.heroEyebrow || "Est. by Bizbobotwitch";
-        const year = cfg.footerYear || "2025";
-
-        document.title = siteName;
-        document.getElementById('siteLogo').textContent = logoText;
-        document.getElementById('heroLine1').textContent = line1;
-        document.getElementById('heroLine2').textContent = line2;
-        document.getElementById('heroEyebrow').textContent = eyebrow;
-        document.getElementById('footerLogo').textContent = logoText + " " + year;
-
-        // Accent colors
-        if (cfg.accentNeon) document.documentElement.style.setProperty('--neon', cfg.accentNeon);
-        if (cfg.accentIce) document.documentElement.style.setProperty('--ice', cfg.accentIce);
-
-        // Footer tip
-        const tipEl = document.getElementById('footerTip');
-        if (tipEl) tipEl.textContent = cfg.footerTip || '';
-
-        // Stats bar visibility
-        const statsBar = document.querySelector('.stats-bar');
-        if (statsBar) statsBar.style.display = (cfg.showStats === false) ? 'none' : 'flex';
-
-        // Bubble sound toggle
-        window.bubbleSoundEnabled = cfg.bubbleSound !== false;
-
-        // Scheduled maintenance
-        let maintOn = cfg.maintenance === true;
-        if (cfg.scheduledMaintenanceAt) {
-            const when = new Date(cfg.scheduledMaintenanceAt).getTime();
-            if (!isNaN(when) && Date.now() >= when) maintOn = true;
-        }
-        const overlay = document.getElementById('maintenanceOverlay');
-        if (maintOn) {
-            overlay.classList.add('active');
-            document.getElementById('maintTitle').textContent = cfg.maintenanceTitle || "SITE OFFLINE";
-            document.getElementById('maintMsg').textContent = cfg.maintenanceMsg || "This platform is temporarily shut down. Please check back later.";
-        } else {
-            overlay.classList.remove('active');
-        }
-
-        // Game of the Day
-        window.renderGameOfDay && window.renderGameOfDay();
-
-        // Announcement + auto-hide
-        const banner = document.getElementById('announcementBanner');
-        if (cfg.announcementEnabled && cfg.announcementMsg && !announcementDismissed) {
-            let show = true;
-            if (cfg.announcementHideAfterHours && cfg.announcementSetAt) {
-                const hours = parseFloat(cfg.announcementHideAfterHours) || 0;
-                if (hours > 0 && (Date.now() - cfg.announcementSetAt) > hours * 3600000) show = false;
-            }
-            if (show) {
-                document.getElementById('announcementText').textContent = cfg.announcementMsg;
-                banner.classList.add('active');
-            } else banner.classList.remove('active');
-        } else {
-            banner.classList.remove('active');
-        }
-
-        // Broadcast modal — one-time only, and only if sent recently (10 min)
-        if (cfg.broadcastMsg && cfg.broadcastToken) {
-            const token = String(cfg.broadcastToken);
-            const age = Date.now() - Number(cfg.broadcastToken);
-            const seen = localStorage.getItem('kvg_broadcast_seen') || '';
-            // Only show if: not already seen, and broadcast is less than 10 minutes old
-            if (seen !== token && !isNaN(age) && age >= 0 && age < 10 * 60 * 1000) {
-                showBroadcast(cfg.broadcastMsg, token);
-            }
-        }
-
-        // Featured / new / hidden re-render
-        if (typeof renderDownloadableGames === 'function') renderDownloadableGames();
-        if (typeof renderWebGames === 'function') renderWebGames();
-        if (typeof updateLaunchCountdown === 'function') updateLaunchCountdown();
-
-        // Changelog
-        const cl = document.getElementById('changelogBox');
-        if (cl) {
-            if (cfg.changelog) {
-                cl.style.display = 'block';
-                document.getElementById('changelogText').textContent = cfg.changelog;
-            } else cl.style.display = 'none';
-        }
-
-        // Global Refresh
-        if (cfg.refreshToken) {
-            if (lastRefreshToken === null) {
-                lastRefreshToken = cfg.refreshToken;
-            } else if (cfg.refreshToken !== lastRefreshToken) {
-                lastRefreshToken = cfg.refreshToken;
-                location.reload();
-            }
-        }
-
-        // Remote confetti from admin
-        if (cfg.confettiToken) {
-            if (window._lastConfettiToken === undefined) {
-                window._lastConfettiToken = cfg.confettiToken;
-            } else if (cfg.confettiToken !== window._lastConfettiToken) {
-                window._lastConfettiToken = cfg.confettiToken;
-                if (typeof fireConfetti === 'function') fireConfetti();
-            }
-        }
-
-        // Shoutout banner (timed)
-        const shout = document.getElementById('shoutoutBanner');
-        if (shout) {
-            if (cfg.shoutoutMsg && cfg.shoutoutUntil && Date.now() < cfg.shoutoutUntil) {
-                document.getElementById('shoutoutText').textContent = cfg.shoutoutMsg;
-                shout.style.display = 'block';
+    // ---- Branding ----
+    function loadConfig() {
+        onValue(ref(db, 'siteConfig'), (snap) => {
+            const cfg = snap.val() || {};
+            document.getElementById('cfgSiteName').value = cfg.siteName || "Keith Valley Games";
+            document.getElementById('cfgLogoText').value = cfg.logoText || "KVG ◈";
+            document.getElementById('cfgFooterYear').value = cfg.footerYear || "2025";
+            document.getElementById('cfgHeroLine1').value = cfg.heroLine1 || "Keith Valley";
+            document.getElementById('cfgHeroLine2').value = cfg.heroLine2 || "Games";
+            document.getElementById('cfgHeroEyebrow').value = cfg.heroEyebrow || "Est. by Bizbobotwitch";
+            document.getElementById('cfgMaintenance').checked = !!cfg.maintenance;
+            document.getElementById('cfgMaintTitle').value = cfg.maintenanceTitle || "SITE OFFLINE";
+            document.getElementById('cfgMaintMsg').value = cfg.maintenanceMsg || "This platform is temporarily shut down. Please check back later.";
+            document.getElementById('cfgAnnouncementEnabled').checked = !!cfg.announcementEnabled;
+            document.getElementById('cfgAnnouncementMsg').value = cfg.announcementMsg || "";
+            document.getElementById('cfgFeaturedGame').value = cfg.featuredGame || "";
+            document.getElementById('cfgGameOfTheDay').value = cfg.gameOfTheDay || "";
+            document.getElementById('cfgNewGames').value = cfg.newGames || "";
+            document.getElementById('cfgHiddenGames').value = cfg.hiddenGames || "";
+            document.getElementById('cfgAccentNeon').value = cfg.accentNeon || "#00ff88";
+            document.getElementById('cfgAccentIce').value = cfg.accentIce || "#00b4ff";
+            document.getElementById('cfgFooterTip').value = cfg.footerTip || "";
+            document.getElementById('cfgChangelog').value = cfg.changelog || "";
+            document.getElementById('cfgAnnounceHideHours').value = cfg.announcementHideAfterHours || "";
+            document.getElementById('cfgBubbleSound').checked = cfg.bubbleSound !== false;
+            document.getElementById('cfgShowStats').checked = cfg.showStats !== false;
+            document.getElementById('cfgStaffNote').value = cfg.staffNote || "";
+            const freezeEl = document.getElementById('cfgFreezeDownloads');
+            if (freezeEl) freezeEl.checked = !!cfg.freezeDownloads;
+            const pq = document.getElementById('cfgPollQuestion');
+            if (pq) pq.value = cfg.pollQuestion || '';
+            const po = document.getElementById('cfgPollOptions');
+            if (po) po.value = cfg.pollOptions || '';
+            const noteBox = document.getElementById('staffNoteDisplay');
+            if (cfg.staffNote) {
+                noteBox.style.display = 'block';
+                noteBox.textContent = '📌 Staff note: ' + cfg.staffNote;
+            } else noteBox.style.display = 'none';
+            if (cfg.scheduledMaintenanceAt) {
+                try {
+                    const d = new Date(cfg.scheduledMaintenanceAt);
+                    const local = new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+                    document.getElementById('cfgScheduledMaint').value = local;
+                } catch(e) {}
             } else {
-                shout.style.display = 'none';
+                document.getElementById('cfgScheduledMaint').value = '';
             }
-        }
-
-        // Freeze downloads
-        window._freezeDownloads = !!cfg.freezeDownloads;
-        if (typeof renderDownloadableGames === 'function') renderDownloadableGames();
-        if (typeof renderWebGames === 'function') renderWebGames();
-        if (typeof renderGameOfDay === 'function') renderGameOfDay();
-
-        // Poll
-        if (typeof renderPoll === 'function') renderPoll(cfg);
-
-        // Remote Gabe Mode LAST so re-renders don't wipe it
-        if (cfg.gabeToken) {
-            if (window._lastGabeToken === undefined) {
-                window._lastGabeToken = cfg.gabeToken;
-            } else if (cfg.gabeToken !== window._lastGabeToken) {
-                window._lastGabeToken = cfg.gabeToken;
-                const secs = parseInt(cfg.gabeDuration, 10) || 10;
-                if (typeof activateGabeMode === 'function') activateGabeMode(secs);
-            } else if (window._gabeMode && typeof applyGabeThumbs === 'function') {
-                applyGabeThumbs();
-            }
-        }
+            document.getElementById('cfgLaunchGame').value = cfg.launchGame || '';
+            if (cfg.launchAt) {
+                try {
+                    const d = new Date(cfg.launchAt);
+                    document.getElementById('cfgLaunchAt').value = new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+                } catch(e) { document.getElementById('cfgLaunchAt').value = ''; }
+            } else document.getElementById('cfgLaunchAt').value = '';
+            renderPickers();
+            syncGameOfDaySelect();
+        }, { onlyOnce: true });
     }
 
-    function showBroadcast(msg, token) {
-        // Mark as seen immediately so refresh/reopen won't show it again
-        if (token) localStorage.setItem('kvg_broadcast_seen', token);
-        let m = document.getElementById('broadcastModal');
-        if (m) m.remove();
-        m = document.createElement('div');
-        m.id = 'broadcastModal';
-        m.style.cssText = 'position:fixed;inset:0;z-index:25000;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:20px;';
-        m.innerHTML = `<div style="background:#0a0a14;border:1px solid var(--neon);border-radius:16px;padding:28px;max-width:420px;width:100%;text-align:center;">
-            <div style="font-family:Orbitron,monospace;color:var(--neon);margin-bottom:12px;letter-spacing:1px;">MESSAGE</div>
-            <p id="broadcastBody" style="color:white;line-height:1.5;margin-bottom:18px;"></p>
-            <button type="button" id="broadcastOkBtn" class="btn-play btn-download" style="width:100%;padding:12px;">Got it</button>
-        </div>`;
-        document.body.appendChild(m);
-        document.getElementById('broadcastBody').textContent = msg;
-        document.getElementById('broadcastOkBtn').onclick = function() {
-            if (token) localStorage.setItem('kvg_broadcast_seen', token);
-            m.remove();
-        };
-    }
+    window.saveLaunch = async function() {
+        try {
+            const game = document.getElementById('cfgLaunchGame').value.trim();
+            const at = document.getElementById('cfgLaunchAt').value;
+            await update(ref(db, 'siteConfig'), {
+                launchGame: game,
+                launchAt: at ? new Date(at).toISOString() : null
+            });
+            showStatus('launchStatus', 'Launch countdown saved');
+        } catch(e) { showStatus('launchStatus', 'Error: '+e.message, false); }
+    };
+    window.clearLaunch = async function() {
+        try {
+            document.getElementById('cfgLaunchGame').value = '';
+            document.getElementById('cfgLaunchAt').value = '';
+            await update(ref(db, 'siteConfig'), { launchGame: '', launchAt: null });
+            showStatus('launchStatus', 'Launch countdown cleared');
+        } catch(e) { showStatus('launchStatus', 'Error: '+e.message, false); }
+    };
 
-    // Konami code → secret page
-    (function(){
-        const seq = [38,38,40,40,37,39,37,39,66,65];
-        let pos = 0;
-        window.addEventListener('keydown', e => {
-            if (e.keyCode === seq[pos]) {
-                pos++;
-                if (pos === seq.length) {
-                    pos = 0;
-                    fireConfetti();
-                    const sp = document.getElementById('secretPage');
-                    if (sp) sp.style.display = 'flex';
-                }
-            } else pos = 0;
-            if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
-                e.preventDefault();
-                const s = document.getElementById('searchInput');
-                if (s) s.focus();
-            }
-        });
-    })();
+    window.simulateDownload = async function() {
+        try {
+            await push(ref(db, 'downloads'), {
+                title: 'Test Game (simulated)',
+                thumb: '🎮',
+                ts: Date.now()
+            });
+            showStatus('quickStatus', 'Simulated download sent — check main site bubbles');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
 
-    // Launch countdown
-    let launchInterval = null;
-    window.updateLaunchCountdown = function() {
-        const cfg = window._siteCfg || {};
-        const box = document.getElementById('launchCountdown');
-        if (!box) return;
-        if (!cfg.launchGame || !cfg.launchAt) {
-            box.style.display = 'none';
-            if (launchInterval) { clearInterval(launchInterval); launchInterval = null; }
-            return;
-        }
-        const target = new Date(cfg.launchAt).getTime();
-        if (isNaN(target)) { box.style.display = 'none'; return; }
-        document.getElementById('launchGameName').textContent = cfg.launchGame;
-        const tick = () => {
-            const diff = target - Date.now();
-            if (diff <= 0) {
-                document.getElementById('launchTimer').textContent = 'LIVE NOW';
+    function loadGuestbookAdmin() {
+        onValue(ref(db, 'guestbook'), (snap) => {
+            const data = snap.val() || {};
+            const entries = Object.entries(data).sort((a,b) => (b[1].ts||0) - (a[1].ts||0));
+            const el = document.getElementById('guestbookAdminList');
+            if (!entries.length) {
+                el.innerHTML = '<p style="color:var(--muted);font-size:0.85rem;">No chat messages yet.</p>';
                 return;
             }
-            const d = Math.floor(diff / 86400000);
-            const h = Math.floor((diff % 86400000) / 3600000);
-            const m = Math.floor((diff % 3600000) / 60000);
-            const s = Math.floor((diff % 60000) / 1000);
-            document.getElementById('launchTimer').textContent =
-                `${d}d ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-        };
-        box.style.display = 'block';
-        tick();
-        if (launchInterval) clearInterval(launchInterval);
-        launchInterval = setInterval(tick, 1000);
-    };
-
-    window.openChatRoom = function() {
-        const room = document.getElementById('chatRoom');
-        room.style.display = 'flex';
-        const saved = localStorage.getItem('kvg_chat_name') || '';
-        if (saved) document.getElementById('chatName').value = saved;
-        setTimeout(() => {
-            const el = document.getElementById('chatMessages');
-            if (el) el.scrollTop = el.scrollHeight;
-            document.getElementById('chatMsg').focus();
-        }, 50);
-    };
-    window.closeChatRoom = function() {
-        document.getElementById('chatRoom').style.display = 'none';
-    };
-    window.sendChat = async function() {
-        const name = (document.getElementById('chatName').value || '').trim().slice(0, 20);
-        const msg = (document.getElementById('chatMsg').value || '').trim().slice(0, 200);
-        const st = document.getElementById('chatStatus');
-        if (!name || !msg) { st.textContent = 'Name and message required'; st.style.color = 'var(--hot)'; return; }
-        try {
-            localStorage.setItem('kvg_chat_name', name);
-            const db = window._db;
-            if (!db) throw new Error('Not connected');
-            await window._fb.push(window._fb.ref(db, 'guestbook'), {
-                name, msg, ts: Date.now()
-            });
-            document.getElementById('chatMsg').value = '';
-            st.textContent = '';
-        } catch (e) {
-            st.textContent = 'Error: ' + e.message;
-            st.style.color = 'var(--hot)';
-        }
-    };
-
-    window.reportBroken = async function(title) {
-        if (!confirm('Report "' + (title || 'this game') + '" as broken?')) return;
-        try {
-            const db = window._db;
-            await window._fb.push(window._fb.ref(db, 'activityLog'), {
-                type: 'report', title: title || 'Unknown', ts: Date.now()
-            });
-            alert('Thanks — the admin will see this report.');
-        } catch (e) {
-            alert('Could not send report');
-        }
-    };
-
-    function fireConfetti() {
-        for (let i=0;i<40;i++){
-            const el = document.createElement('div');
-            el.style.cssText = `position:fixed;top:-10px;left:${Math.random()*100}%;width:8px;height:8px;background:${['#00ff88','#00b4ff','#ffd700','#ff3a6e'][i%4]};border-radius:50%;z-index:30000;pointer-events:none;animation:confettiFall ${2+Math.random()*2}s linear forwards;`;
-            document.body.appendChild(el);
-            setTimeout(()=>el.remove(), 4000);
-        }
-    }
-    if (!document.getElementById('confettiStyle')) {
-        const st = document.createElement('style');
-        st.id = 'confettiStyle';
-        st.textContent = `@keyframes confettiFall{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}`;
-        document.head.appendChild(st);
-    }
-
-    function playBubbleSound() {
-        if (!window.bubbleSoundEnabled) return;
-        try {
-            const ctx = new (window.AudioContext||window.webkitAudioContext)();
-            const o = ctx.createOscillator(); const g = ctx.createGain();
-            o.connect(g); g.connect(ctx.destination);
-            o.frequency.value = 880; g.gain.value = 0.04;
-            o.start(); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.2); o.stop(ctx.currentTime+0.2);
-        } catch(e){}
-    }
-
-    window.dismissAnnouncement = function() {
-        announcementDismissed = true;
-        document.getElementById('announcementBanner').classList.remove('active');
-    };
-
-    window.renderGameOfDay = function() {
-        const cfg = window._siteCfg || {};
-        const god = document.getElementById('gameOfDay');
-        const name = (cfg.gameOfTheDay || '').trim();
-        if (!name) {
-            god.classList.remove('active');
-            return;
-        }
-        god.classList.add('active');
-        document.getElementById('gameOfDayName').textContent = name;
-
-        const matchName = (title) => {
-            const t = (title || '').toLowerCase();
-            const n = name.toLowerCase();
-            return t === n || t.includes(n) || n.includes(t);
-        };
-
-        const dl = (typeof downloadableGames !== 'undefined' ? downloadableGames : []).find(g => matchName(g.title));
-        const web = (window.webGames || []).find(g => matchName(g.title));
-        const thumbEl = document.getElementById('gameOfDayThumb');
-        const metaEl = document.getElementById('gameOfDayMeta');
-        const actionsEl = document.getElementById('gameOfDayActions');
-        const esc = (s) => String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-
-        if (dl) {
-            if (dl.thumb && String(dl.thumb).startsWith('http')) {
-                thumbEl.innerHTML = `<img src="${dl.thumb}" alt="">`;
-            } else {
-                thumbEl.innerHTML = '🎮';
-            }
-            metaEl.textContent = `${dl.size || '?'} MB · Downloadable PC game`;
-            actionsEl.innerHTML = window._freezeDownloads
-                ? `<button type="button" class="btn-play" style="padding:12px 26px; font-size:0.78rem; background:#333;color:#888;cursor:not-allowed;" disabled>LOCKED</button>`
-                : `<button type="button" class="btn-play btn-download" style="padding:12px 26px; font-size:0.78rem;" onclick="triggerDownload('${esc(dl.url)}', '${esc(dl.title)}', '${esc(dl.thumb)}')">Download Now</button>`;
-        } else if (web) {
-            thumbEl.innerHTML = `<span style="font-size:2.8rem;">${web.thumb || '🎮'}</span>`;
-            metaEl.textContent = `${web.tag || 'WEB'} · Play instantly in browser`;
-            actionsEl.innerHTML = `<a href="${web.url}" target="_blank" class="btn-play btn-play-web" style="padding:12px 26px; font-size:0.78rem; text-decoration:none;">Play Now</a>`;
-        } else {
-            thumbEl.innerHTML = '🎮';
-            metaEl.textContent = 'Loading game details…';
-            actionsEl.innerHTML = '';
-        }
-    };
-
-    window.renderTimers = function() {
-        const sidebarCard = document.getElementById('sidebarTimersCard');
-        const sidebarList = document.getElementById('sidebarTimersList');
-
-        if (window.siteTimers.length === 0) {
-            sidebarCard.style.display = 'none';
-            return;
-        }
-
-        sidebarCard.style.display = 'block';
-        const now = new Date().getTime();
-
-        sidebarList.innerHTML = window.siteTimers.map(t => {
-            const targetTime = new Date(t.targetDate).getTime();
-            const distance = targetTime - now;
-            
-            let display = "";
-            if (distance < 0) {
-                display = "<span style='color:var(--hot)'>ENDED</span>";
-            } else {
-                const d = Math.floor(distance / (1000 * 60 * 60 * 24));
-                const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const s = Math.floor((distance % (1000 * 60)) / 1000);
-                display = `${d}d ${h}h ${m}m ${s}s`;
-            }
-            
-            return `
-            <div style="background:rgba(255,255,255,0.03); padding:10px 14px; border-radius:8px; border:1px solid var(--glass-border);">
-                <div style="font-family:'Orbitron'; font-size:0.8rem; color:white; margin-bottom:4px;">${t.title}</div>
-                <div style="font-family:'Space Mono'; font-size:0.75rem; color:var(--ice);">${display}</div>
-            </div>`;
-        }).join('');
-    };
-
-    setInterval(() => {
-        if (window.siteTimers.length > 0) window.renderTimers();
-    }, 1000);
-
-    const defaultWebGames = [
-        { title: "Subway Surfers", url: "https://bizbobotwitch.github.io/druskii128.github.io/subway-surfers.html", thumb: "🏃‍♂️", tag: "ARCADE" },
-        { title: "Keith Valley Fisher", url: "https://bizbobotwitch.github.io/Keith-Valley-Fisher/", thumb: "🎣", tag: "ADVENTURE" },
-        { title: "Polytrack", url: "https://bizbobotwitch.github.io/druskii128.github.io/projects/polytrack/index.html", thumb: "🏎️", tag: "RACING" },
-        { title: "Ages of Conflict", url: "https://bizbobotwitch.github.io/druskii128.github.io/projects/ages-of-conflict/index.html", thumb: "⚔️", tag: "STRATEGY" },
-        { title: "Piggy Escape", url: "https://bizbobotwitch.github.io/druskii128.github.io/projects/block-the-pig/index.html", thumb: "🐷", tag: "PUZZLE" },
-        { title: "Core Ball", url: "https://bizbobotwitch.github.io/druskii128.github.io/projects/core-ball/index.html", thumb: "⚽", tag: "ARCADE" },
-        { title: "CircleoO", url: "https://bizbobotwitch.github.io/druskii128.github.io/projects/circlo/index.html", thumb: "⭕", tag: "PUZZLE" },
-        { title: "BitLife", url: "https://bizbobotwitch.github.io/druskii128.github.io/projects/bitlife/index.html", thumb: "🧬", tag: "SIM" },
-        { title: "Slope", url: "https://bizbobotwitch.github.io/druskii128.github.io/projects/slope/index.html", thumb: "🏂", tag: "RUNNER" },
-        { title: "Death Run 3D", url: "https://bizbobotwitch.github.io/druskii128.github.io/projects/death-run-3d/index.html", thumb: "💀", tag: "ACTION" },
-        { title: "Drift Boss", url: "https://bizbobotwitch.github.io/druskii128.github.io/projects/drift-boss/index.html", thumb: "🏎️", tag: "RACING" },
-        { title: "Rocketpult", url: "https://bizbobotwitch.github.io/druskii128.github.io/projects/rocketpult/index.html", thumb: "🚀", tag: "PHYSICS" },
-        { title: "2048", url: "https://bizbobotwitch.github.io/druskii128.github.io/projects/2048/index.html", thumb: "🔢", tag: "PUZZLE" },
-        { title: "Cookie Clicker", url: "https://bizbobotwitch.github.io/druskii128.github.io/projects/cookie-clicker/index.html", thumb: "🍪", tag: "IDLE" }
-    ];
-    window.customWebGames = [];
-    window.webGames = defaultWebGames.slice();
-    window.rebuildWebGames = function() {
-        const seen = new Set();
-        const merged = [];
-        (window.customWebGames || []).forEach(g => {
-            if (!g || !g.title || !g.url) return;
-            const k = g.title.toLowerCase();
-            if (seen.has(k)) return;
-            seen.add(k);
-            merged.push({ title: g.title, url: g.url, thumb: g.thumb || '🎮', tag: g.tag || 'WEB', custom: true });
+            el.innerHTML = entries.map(([key, e]) => {
+                const time = e.ts ? new Date(e.ts).toLocaleString() : '';
+                return `<div class="timer-item" style="flex-direction:column;align-items:stretch;gap:8px;">
+                    <div>
+                        <div class="title">${(e.name||'Anon')}</div>
+                        <div class="date">${time}</div>
+                        <div style="color:var(--text);font-size:0.85rem;margin-top:4px;">${(e.msg||'')}</div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-danger" style="padding:6px 12px;font-size:0.65rem;" onclick="deleteGuestbook('${key}')">Delete</button>
+                    </div>
+                </div>`;
+            }).join('');
         });
-        defaultWebGames.forEach(g => {
-            const k = g.title.toLowerCase();
-            if (seen.has(k)) return;
-            seen.add(k);
-            merged.push(g);
-        });
-        window.webGames = merged;
-        const stat = document.getElementById('stat-web-count');
-        if (stat) stat.textContent = String(window.webGames.length);
-        const total = document.getElementById('stat-games');
-        if (total && typeof downloadableGames !== 'undefined') total.textContent = downloadableGames.length + window.webGames.length;
-        if (typeof renderWebGames === 'function') renderWebGames();
-        if (typeof renderGameOfDay === 'function') renderGameOfDay();
+    }
+    window.deleteGuestbook = async function(key) {
+        try {
+            await remove(ref(db, 'guestbook/' + key));
+            showStatus('guestbookAdminStatus', 'Deleted');
+        } catch(e) { showStatus('guestbookAdminStatus', 'Error: '+e.message, false); }
     };
-    // in case Firebase already delivered custom games before this ran
-    if (window.customWebGames && window.customWebGames.length) window.rebuildWebGames();
-
-    let pendingDownload = null;
-
-    window.triggerDownload = function(url, title, thumb) {
-        if (window._freezeDownloads) {
-            alert('Downloads are temporarily frozen by the admin. Try again later!');
-            return;
-        }
-        pendingDownload = { url, title, thumb };
-        document.getElementById('downloadModal').style.display = 'flex';
+    window.clearAllChat = async function() {
+        if (!confirm('Delete all chat messages?')) return;
+        try {
+            await set(ref(db, 'guestbook'), null);
+            showStatus('guestbookAdminStatus', 'Chat cleared');
+        } catch(e) { showStatus('guestbookAdminStatus', 'Error: '+e.message, false); }
     };
 
-    window.closeModal = function() {
-        document.getElementById('downloadModal').style.display = 'none';
-        if (pendingDownload) {
-            if (window.logDownload) window.logDownload(pendingDownload.title, pendingDownload.thumb);
-            window.location.href = pendingDownload.url;
-            pendingDownload = null;
-        }
-    };
+    let adminGameTitles = [];
+    let githubGameTitles = [];
+    let customWebGameTitles = [];
+    const webGameTitles = ["Subway Surfers","Keith Valley Fisher","Polytrack","Ages of Conflict","Piggy Escape","Core Ball","CircleoO","BitLife","Slope","Death Run 3D","Drift Boss","Rocketpult","2048","Cookie Clicker"];
 
-    window.spawnDownloadBubble = function(item) {
-        const container = document.getElementById('downloadBubbles');
-        if (!container) return;
-        if (typeof playBubbleSound === 'function') playBubbleSound();
-        const bubble = document.createElement('div');
-        bubble.className = 'dl-bubble';
-        const thumbHtml = item.thumb
-            ? (item.thumb.startsWith('http')
-                ? `<img src="${item.thumb}" alt="">`
-                : `<div class="emoji-thumb">${item.thumb}</div>`)
-            : `<div class="emoji-thumb">🎮</div>`;
-        bubble.innerHTML = `
-            ${thumbHtml}
-            <div class="info">
-                <div class="title">${item.title || 'Game'}</div>
-                <div class="sub">Someone just downloaded</div>
-            </div>`;
-        container.appendChild(bubble);
-        setTimeout(() => bubble.remove(), 4600);
-    };
+    function rebuildAdminGameTitles() {
+        adminGameTitles = [...new Set([
+            ...githubGameTitles,
+            ...webGameTitles,
+            ...customWebGameTitles
+        ].filter(Boolean))].sort((a,b) => a.localeCompare(b));
+        renderPickers();
+        syncGameOfDaySelect();
+    }
 
-    async function fetchGames() {
+    window.loadGameList = async function() {
         try {
             const res = await fetch('https://api.github.com/repos/bizbobotwitch/GAME/releases/tags/Games');
             const release = await res.json();
-            const images = {};
-            
-            release.assets.forEach(asset => {
-                if (asset.name.match(/\.(png|jpg|jpeg|webp)$/i)) {
-                    const namePart = asset.name.toLowerCase().split('-kv')[0].split('.')[0].trim();
-                    images[namePart] = asset.browser_download_url;
-                }
-            });
-
-            downloadableGames = release.assets
+            githubGameTitles = (release.assets || [])
                 .filter(a => !a.name.match(/\.(png|jpg|jpeg|webp)$/i))
-                .map(asset => {
-                    const title = asset.name.split('.')[0].replace(/-KVGAMES/gi, '').trim();
-                    const key = title.toLowerCase();
-                    
-                    let thumb = images[key] || images[key.replace(/\s/g, "")] || null;
-                    if (key.includes("hollow") && key.includes("knight")) {
-                        thumb = images["hollow knight"] || images["hollowknight"] || thumb;
-                    }
-                    if(Math.random() < 1/200) thumb = "https://github.com/bizbobotwitch/GAME/releases/download/Games/gabe.png";
-
-                    return { title, url: asset.browser_download_url, size: (asset.size / 1048576).toFixed(1), thumb };
-                });
-
-            document.getElementById('stat-games').textContent = downloadableGames.length + (window.webGames || []).length;
-            renderDownloadableGames();
-            renderWebGames();
-            if (window.renderGameOfDay) window.renderGameOfDay();
-        } catch(e) { console.error(e); }
-    }
-
-    function getFavorites() {
-        try { return JSON.parse(localStorage.getItem('kvg_favorites') || '[]'); } catch(e) { return []; }
-    }
-    function setFavorites(arr) {
-        localStorage.setItem('kvg_favorites', JSON.stringify(arr));
-    }
-    window.toggleFavorite = function(title) {
-        let favs = getFavorites();
-        if (favs.includes(title)) favs = favs.filter(t => t !== title);
-        else favs.push(title);
-        setFavorites(favs);
-        if (window._showFavsOnly) filterGames();
-        else { renderDownloadableGames(); renderWebGames(); }
-    };
-    window._showFavsOnly = false;
-    window.toggleFavFilter = function() {
-        window._showFavsOnly = !window._showFavsOnly;
-        const btn = document.getElementById('favFilterBtn');
-        if (btn) btn.classList.toggle('active-filter', window._showFavsOnly);
-        filterGames();
-        if (window._showFavsOnly) {
-            const favs = getFavorites().map(t => t.toLowerCase());
-            document.getElementById('web-games-list').innerHTML = '';
-            renderWebGames();
-            // re-filter web after render
-            const favSet = new Set(getFavorites().map(t => t.toLowerCase()));
-            // simpler: just call filter-style on both
+                .map(a => a.name.split('.')[0].replace(/-KVGAMES/gi, '').trim())
+                .filter(Boolean);
+            rebuildAdminGameTitles();
+            showStatus('featuredStatus', 'Loaded ' + adminGameTitles.length + ' games (includes admin web games)');
+        } catch(e) {
+            githubGameTitles = [];
+            rebuildAdminGameTitles();
+            showStatus('featuredStatus', 'GitHub failed — using web + custom list', false);
         }
-        filterGames();
     };
 
-    window.playRandomDownloadable = function() {
-        const list = downloadableGames.filter(g => !window.isHiddenGame(g.title));
-        if (!list.length) return alert('No downloadable games loaded yet');
-        const g = list[Math.floor(Math.random() * list.length)];
-        triggerDownload(g.url, g.title, g.thumb);
-    };
-    window.playRandomWeb = function() {
-        const list = window.webGames || [];
-        if (!list.length) return;
-        const g = list[Math.floor(Math.random() * list.length)];
-        window.open(g.url, '_blank');
-    };
-    // keep old name working
-    window.playRandomGame = function() {
-        if (Math.random() < 0.5) playRandomDownloadable();
-        else playRandomWeb();
+    function parseList(id) {
+        return (document.getElementById(id).value || '').split(',').map(s => s.trim()).filter(Boolean);
+    }
+    function writeList(id, arr) {
+        document.getElementById(id).value = arr.join(', ');
+    }
+
+    function renderPickers() {
+        const featured = new Set(parseList('cfgFeaturedGame').map(s => s.toLowerCase()));
+        const news = new Set(parseList('cfgNewGames').map(s => s.toLowerCase()));
+        const hidden = new Set(parseList('cfgHiddenGames').map(s => s.toLowerCase()));
+        const mk = (containerId, set, fieldId, activeColor) => {
+            const el = document.getElementById(containerId);
+            if (!el) return;
+            if (!adminGameTitles.length) {
+                el.innerHTML = '<span style="color:var(--muted);font-size:0.8rem;">Click “Refresh Game List” to load titles</span>';
+                return;
+            }
+            el.innerHTML = adminGameTitles.map(title => {
+                const on = set.has(title.toLowerCase());
+                return `<button type="button" data-title="${title.replace(/"/g,'&quot;')}" style="padding:6px 10px;border-radius:8px;font-size:0.72rem;cursor:pointer;border:1px solid ${on ? activeColor : 'var(--glass-border)'};background:${on ? 'rgba(0,255,136,0.12)' : 'rgba(0,0,0,0.3)'};color:${on ? 'var(--neon)' : 'var(--text)'};">${title}</button>`;
+            }).join('');
+            el.querySelectorAll('button').forEach(btn => {
+                btn.onclick = () => {
+                    const t = btn.getAttribute('data-title');
+                    let arr = parseList(fieldId);
+                    const lower = arr.map(x => x.toLowerCase());
+                    const i = lower.indexOf(t.toLowerCase());
+                    if (i >= 0) arr.splice(i, 1);
+                    else arr.push(t);
+                    writeList(fieldId, arr);
+                    renderPickers();
+                };
+            });
+        };
+        mk('featuredPicker', featured, 'cfgFeaturedGame', 'rgba(255,215,0,0.5)');
+        mk('newGamesPicker', news, 'cfgNewGames', 'rgba(255,58,110,0.5)');
+        mk('hiddenGamesPicker', hidden, 'cfgHiddenGames', 'rgba(255,58,110,0.5)');
+    }
+
+    function syncGameOfDaySelect() {
+        const sel = document.getElementById('cfgGameOfTheDaySelect');
+        if (!sel) return;
+        const current = document.getElementById('cfgGameOfTheDay').value.trim();
+        sel.innerHTML = '<option value="">— None —</option>' + adminGameTitles.map(t =>
+            `<option value="${t.replace(/"/g,'&quot;')}" ${t === current ? 'selected' : ''}>${t}</option>`
+        ).join('');
+        sel.onchange = () => {
+            document.getElementById('cfgGameOfTheDay').value = sel.value;
+        };
+    }
+
+    window.saveFeaturedStuff = async function() {
+        try {
+            await update(ref(db, 'siteConfig'), {
+                featuredGame: document.getElementById('cfgFeaturedGame').value.trim(),
+                gameOfTheDay: document.getElementById('cfgGameOfTheDay').value.trim(),
+                newGames: document.getElementById('cfgNewGames').value.trim(),
+                hiddenGames: document.getElementById('cfgHiddenGames').value.trim()
+            });
+            await push(ref(db, 'activityLog'), { type: 'config', title: 'Featured/New/Hidden updated', ts: Date.now() });
+            showStatus('featuredStatus', 'Featured / New / Hidden saved — live now');
+        } catch(e) { showStatus('featuredStatus', 'Error: '+e.message, false); }
     };
 
-    window._gabeMode = false;
-    window._gabeTimer = null;
-    window.GABE_URL = "https://github.com/bizbobotwitch/GAME/releases/download/Games/gabe.png";
+    window.applyThemePreset = function(name) {
+        const presets = {
+            neon: { neon: '#00ff88', ice: '#00b4ff' },
+            purple: { neon: '#b388ff', ice: '#7c4dff' },
+            red: { neon: '#ff3a6e', ice: '#ff8a65' },
+            gold: { neon: '#ffd700', ice: '#ffb300' },
+            ice: { neon: '#00e5ff', ice: '#2979ff' }
+        };
+        const p = presets[name];
+        if (!p) return;
+        document.getElementById('cfgAccentNeon').value = p.neon;
+        document.getElementById('cfgAccentIce').value = p.ice;
+    };
 
-    window.applyGabeThumbs = function() {
-        const url = window.GABE_URL;
-        document.querySelectorAll('.thumb-box').forEach(box => {
-            box.innerHTML = `<img src="${url}" class="thumb-img" alt="gabe" style="width:100%;height:100%;object-fit:contain;background:#000;position:relative;z-index:1;">`;
+    window.clearBroadcast = async function() {
+        try {
+            await update(ref(db, 'siteConfig'), { broadcastMsg: '', broadcastToken: null });
+            document.getElementById('cfgBroadcastMsg').value = '';
+            showStatus('broadcastStatus', 'Broadcast cleared');
+        } catch(e) { showStatus('broadcastStatus', 'Error: '+e.message, false); }
+    };
+
+    window.clearAnnouncement = async function() {
+        try {
+            await update(ref(db, 'siteConfig'), { announcementEnabled: false, announcementMsg: '' });
+            document.getElementById('cfgAnnouncementEnabled').checked = false;
+            document.getElementById('cfgAnnouncementMsg').value = '';
+            showStatus('quickStatus', 'Announcement cleared');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+
+    window.throwConfetti = async function() {
+        try {
+            await update(ref(db, 'siteConfig'), { confettiToken: Date.now() });
+            // also confetti on admin page
+            for (let i = 0; i < 50; i++) {
+                const el = document.createElement('div');
+                el.style.cssText = `position:fixed;top:-10px;left:${Math.random()*100}%;width:8px;height:8px;background:${['#00ff88','#00b4ff','#ffd700','#ff3a6e','#b388ff'][i%5]};border-radius:50%;z-index:30000;pointer-events:none;animation:adminConfetti ${2+Math.random()*2}s linear forwards;`;
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 4000);
+            }
+            showStatus('quickStatus', 'Confetti thrown on all open site tabs!');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+
+    window.triggerGabeMode = async function() {
+        try {
+            const secs = parseInt(document.getElementById('cfgGabeSeconds').value, 10) || 10;
+            await update(ref(db, 'siteConfig'), { gabeToken: Date.now(), gabeDuration: secs });
+            showStatus('quickStatus', 'Gabe Mode sent for ' + secs + 's on all open tabs');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+
+    window.sendShoutout = async function() {
+        const msg = document.getElementById('cfgShoutout').value.trim();
+        if (!msg) { showStatus('quickStatus', 'Shoutout message required', false); return; }
+        try {
+            await update(ref(db, 'siteConfig'), {
+                shoutoutMsg: msg,
+                shoutoutUntil: Date.now() + 60 * 1000
+            });
+            showStatus('quickStatus', 'Shoutout live for 1 minute');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+
+    window.toggleFreezeDownloads = async function() {
+        try {
+            const on = document.getElementById('cfgFreezeDownloads').checked;
+            await update(ref(db, 'siteConfig'), { freezeDownloads: on });
+            showStatus('quickStatus', on ? 'Downloads FROZEN site-wide' : 'Downloads unfrozen');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+
+    window.savePoll = async function() {
+        try {
+            const q = document.getElementById('cfgPollQuestion').value.trim();
+            const opts = document.getElementById('cfgPollOptions').value.trim();
+            if (!q || opts.split(',').filter(s => s.trim()).length < 2) {
+                showStatus('quickStatus', 'Need a question and at least 2 options', false);
+                return;
+            }
+            await set(ref(db, 'pollVotes'), null);
+            await update(ref(db, 'siteConfig'), {
+                pollQuestion: q,
+                pollOptions: opts,
+                pollId: String(Date.now())
+            });
+            showStatus('quickStatus', 'Poll is live — votes reset');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+
+    window.clearPoll = async function() {
+        try {
+            document.getElementById('cfgPollQuestion').value = '';
+            document.getElementById('cfgPollOptions').value = '';
+            await update(ref(db, 'siteConfig'), { pollQuestion: '', pollOptions: '', pollId: null });
+            await set(ref(db, 'pollVotes'), null);
+            showStatus('quickStatus', 'Poll cleared');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+
+    // confetti keyframes for admin
+    (function(){
+        if (document.getElementById('adminConfettiStyle')) return;
+        const st = document.createElement('style');
+        st.id = 'adminConfettiStyle';
+        st.textContent = `@keyframes adminConfetti{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}`;
+        document.head.appendChild(st);
+    })();
+
+    window.exportConfigJSON = async function() {
+        try {
+            const snap = await new Promise(res => onValue(ref(db, 'siteConfig'), s => res(s), { onlyOnce: true }));
+            const blob = new Blob([JSON.stringify(snap.val() || {}, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'kvg-siteConfig.json';
+            a.click();
+            showStatus('quickStatus', 'Config JSON downloaded');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+
+    window.saveExtras = async function() {
+        try {
+            await update(ref(db, 'siteConfig'), {
+                accentNeon: document.getElementById('cfgAccentNeon').value.trim() || "#00ff88",
+                accentIce: document.getElementById('cfgAccentIce').value.trim() || "#00b4ff",
+                footerTip: document.getElementById('cfgFooterTip').value.trim(),
+                changelog: document.getElementById('cfgChangelog').value,
+                announcementHideAfterHours: document.getElementById('cfgAnnounceHideHours').value.trim() || "0",
+                bubbleSound: document.getElementById('cfgBubbleSound').checked,
+                showStats: document.getElementById('cfgShowStats').checked,
+                staffNote: document.getElementById('cfgStaffNote').value.trim()
+            });
+            await push(ref(db, 'activityLog'), { type: 'config', title: 'Extras updated', ts: Date.now() });
+            const noteBox = document.getElementById('staffNoteDisplay');
+            const note = document.getElementById('cfgStaffNote').value.trim();
+            if (note) { noteBox.style.display = 'block'; noteBox.textContent = '📌 Staff note: ' + note; }
+            else noteBox.style.display = 'none';
+            showStatus('extrasStatus', 'Extras saved — live now');
+        } catch(e) { showStatus('extrasStatus', 'Error: '+e.message, false); }
+    };
+
+    window.sendBroadcast = async function() {
+        const msg = document.getElementById('cfgBroadcastMsg').value.trim();
+        if (!msg) { showStatus('broadcastStatus', 'Message required', false); return; }
+        try {
+            await update(ref(db, 'siteConfig'), { broadcastMsg: msg, broadcastToken: Date.now() });
+            await push(ref(db, 'activityLog'), { type: 'broadcast', title: msg.slice(0,60), ts: Date.now() });
+            showStatus('broadcastStatus', 'Broadcast sent to all visitors');
+        } catch(e) { showStatus('broadcastStatus', 'Error: '+e.message, false); }
+    };
+
+    window.exportDownloadsCSV = async function() {
+        try {
+            const snap = await new Promise(res => onValue(ref(db, 'downloads'), s => res(s), { onlyOnce: true }));
+            const data = snap.val() || {};
+            let csv = 'title,timestamp,date\n';
+            Object.values(data).forEach(d => {
+                csv += `"${(d.title||'').replace(/"/g,'""')}",${d.ts||''},"${d.ts?new Date(d.ts).toISOString():''}"\n`;
+            });
+            const blob = new Blob([csv], {type:'text/csv'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'kvg-downloads.csv';
+            a.click();
+            showStatus('quickStatus', 'CSV downloaded');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+
+    window.resetLiveData = async function() {
+        if (!confirm('Clear downloads, presence, download counts, and activity log?')) return;
+        try {
+            await set(ref(db, 'downloads'), null);
+            await set(ref(db, 'downloadCount'), 0);
+            await set(ref(db, 'gameDownloads'), null);
+            await set(ref(db, 'presence'), null);
+            await set(ref(db, 'activityLog'), null);
+            showStatus('quickStatus', 'Live data reset');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+
+    window.saveBranding = async function() {
+        try {
+            await update(ref(db, 'siteConfig'), {
+                siteName: document.getElementById('cfgSiteName').value.trim() || "Keith Valley Games",
+                logoText: document.getElementById('cfgLogoText').value.trim() || "KVG ◈",
+                footerYear: document.getElementById('cfgFooterYear').value.trim() || "2025",
+                heroLine1: document.getElementById('cfgHeroLine1').value.trim() || "Keith Valley",
+                heroLine2: document.getElementById('cfgHeroLine2').value.trim() || "Games",
+                heroEyebrow: document.getElementById('cfgHeroEyebrow').value.trim() || "Est. by Bizbobotwitch"
+            });
+            showStatus('brandStatus', "Branding saved — live on site now");
+        } catch (e) {
+            showStatus('brandStatus', "Error: " + e.message, false);
+        }
+    };
+
+    window.saveMaintenance = async function() {
+        try {
+            const schedVal = document.getElementById('cfgScheduledMaint').value;
+            const payload = {
+                maintenance: document.getElementById('cfgMaintenance').checked,
+                maintenanceTitle: document.getElementById('cfgMaintTitle').value.trim() || "SITE OFFLINE",
+                maintenanceMsg: document.getElementById('cfgMaintMsg').value.trim() || "This platform is temporarily shut down. Please check back later."
+            };
+            if (schedVal) payload.scheduledMaintenanceAt = new Date(schedVal).toISOString();
+            else payload.scheduledMaintenanceAt = null;
+            await update(ref(db, 'siteConfig'), payload);
+            showStatus('maintStatus', "Maintenance settings saved — live now");
+        } catch (e) {
+            showStatus('maintStatus', "Error: " + e.message, false);
+        }
+    };
+
+    window.clearScheduledMaint = async function() {
+        try {
+            document.getElementById('cfgScheduledMaint').value = '';
+            await update(ref(db, 'siteConfig'), { scheduledMaintenanceAt: null });
+            showStatus('maintStatus', "Schedule cleared");
+        } catch (e) {
+            showStatus('maintStatus', "Error: " + e.message, false);
+        }
+    };
+
+    window.saveAnnouncement = async function() {
+        try {
+            await update(ref(db, 'siteConfig'), {
+                announcementEnabled: document.getElementById('cfgAnnouncementEnabled').checked,
+                announcementMsg: document.getElementById('cfgAnnouncementMsg').value.trim(),
+                announcementSetAt: Date.now()
+            });
+            showStatus('announceStatus', "Announcement saved — live on site now");
+        } catch (e) {
+            showStatus('announceStatus', "Error: " + e.message, false);
+        }
+    };
+
+    window.forceGlobalRefresh = async function() {
+        if (!confirm("Force every visitor to reload the page right now?")) return;
+        try {
+            await update(ref(db, 'siteConfig'), {
+                refreshToken: Date.now()
+            });
+            showStatus('refreshStatus', "Global refresh triggered — all open tabs will reload");
+        } catch (e) {
+            showStatus('refreshStatus', "Error: " + e.message, false);
+        }
+    };
+
+    window.forceShutdown = async function() {
+        document.getElementById('cfgMaintenance').checked = true;
+        await saveMaintenance();
+        showStatus('quickStatus', "Site is now offline");
+    };
+
+    window.resetBranding = async function() {
+        try {
+            await update(ref(db, 'siteConfig'), {
+                siteName: "Keith Valley Games",
+                logoText: "KVG ◈",
+                footerYear: "2025",
+                heroLine1: "Keith Valley",
+                heroLine2: "Games",
+                heroEyebrow: "Est. by Bizbobotwitch"
+            });
+            loadConfig();
+            showStatus('quickStatus', "Branding reset to defaults");
+        } catch (e) {
+            showStatus('quickStatus', "Error: " + e.message, false);
+        }
+    };
+
+    // ---- Timers ----
+    let timersData = {};
+
+    function loadTimers() {
+        onValue(ref(db, 'timers'), (snap) => {
+            timersData = snap.val() || {};
+            renderTimersList();
         });
-        // also any standalone game images
-        document.querySelectorAll('#download-list img.thumb-img, #web-games-list img.thumb-img').forEach(img => {
-            img.src = url;
-        });
-        const god = document.getElementById('gameOfDayThumb');
-        if (god) god.innerHTML = `<img src="${url}" alt="gabe" style="width:100%;height:100%;object-fit:contain;">`;
-    };
+    }
 
-    window.activateGabeMode = function(seconds) {
-        const secs = Math.max(1, parseInt(seconds, 10) || 10);
-        if (window._gabeTimer) clearTimeout(window._gabeTimer);
-        window._gabeMode = true;
-        // Force both lists visible thumbs (even if one tab is hidden)
-        if (typeof renderDownloadableGames === 'function') renderDownloadableGames();
-        if (typeof renderWebGames === 'function') renderWebGames();
-        applyGabeThumbs();
-        // re-apply shortly in case async re-render races
-        setTimeout(applyGabeThumbs, 50);
-        setTimeout(applyGabeThumbs, 300);
-        window._gabeTimer = setTimeout(() => {
-            window._gabeMode = false;
-            if (typeof renderDownloadableGames === 'function') renderDownloadableGames();
-            if (typeof renderWebGames === 'function') renderWebGames();
-            if (typeof renderGameOfDay === 'function') renderGameOfDay();
-        }, secs * 1000);
-    };
-
-    window.renderPoll = function(cfg) {
-        const box = document.getElementById('pollBox');
-        if (!box) return;
-        const q = (cfg && cfg.pollQuestion) ? String(cfg.pollQuestion).trim() : '';
-        const opts = (cfg && cfg.pollOptions) ? String(cfg.pollOptions).split(',').map(s => s.trim()).filter(Boolean) : [];
-        if (!q || opts.length < 2) {
-            box.style.display = 'none';
+    function renderTimersList() {
+        const list = document.getElementById('timersList');
+        const keys = Object.keys(timersData);
+        if (keys.length === 0) {
+            list.innerHTML = '<p style="color:var(--muted); font-size:0.85rem; margin-bottom:10px;">No active timers.</p>';
             return;
         }
-        box.style.display = 'block';
-        document.getElementById('pollQuestion').textContent = q;
-        window._pollOpts = opts;
-        // load votes
-        if (window._db && window._fb) {
-            window._fb.get(window._fb.ref(window._db, 'pollVotes')).then(snap => {
-                const votes = snap.val() || {};
-                drawPollOptions(opts, votes);
-            }).catch(() => drawPollOptions(opts, {}));
-        } else {
-            drawPollOptions(opts, {});
-        }
-    };
-
-    function drawPollOptions(opts, votes) {
-        const el = document.getElementById('pollOptions');
-        if (!el) return;
-        const total = opts.reduce((s, _, i) => s + (votes[i] || votes[String(i)] || 0), 0);
-        const voted = localStorage.getItem('kvg_poll_vote');
-        const pollId = (window._siteCfg && window._siteCfg.pollId) || 'default';
-        const already = voted && voted.startsWith(pollId + ':');
-        el.innerHTML = opts.map((opt, i) => {
-            const n = votes[i] || votes[String(i)] || 0;
-            const pct = total ? Math.round((n / total) * 100) : 0;
-            if (already) {
-                return `<div style="padding:10px 12px;border-radius:10px;border:1px solid var(--glass-border);background:rgba(0,0,0,0.3);">
-                    <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:6px;"><span>${opt}</span><span style="color:var(--neon);">${pct}%</span></div>
-                    <div style="height:6px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:var(--neon);"></div></div>
-                </div>`;
-            }
-            return `<button type="button" onclick="castPollVote(${i})" style="text-align:left;padding:10px 12px;border-radius:10px;border:1px solid var(--glass-border);background:rgba(0,0,0,0.3);color:white;cursor:pointer;font-family:Syne,sans-serif;">${opt}</button>`;
+        list.innerHTML = keys.map(key => {
+            const t = timersData[key];
+            const dateStr = t.targetDate ? new Date(t.targetDate).toLocaleString() : "—";
+            return `
+            <div class="timer-item">
+                <div class="info">
+                    <div class="title">${t.title || "Untitled"}</div>
+                    <div class="date">${dateStr}</div>
+                </div>
+                <button class="btn btn-danger" style="padding:8px 14px; font-size:0.65rem;" onclick="deleteTimer('${key}')">Delete</button>
+            </div>`;
         }).join('');
-        const st = document.getElementById('pollStatus');
-        if (st) st.textContent = already ? (total + ' vote' + (total===1?'':'s')) : 'Pick one — live results after you vote';
     }
 
-    window.castPollVote = async function(idx) {
-        const pollId = (window._siteCfg && window._siteCfg.pollId) || 'default';
-        if (localStorage.getItem('kvg_poll_vote') && localStorage.getItem('kvg_poll_vote').startsWith(pollId + ':')) return;
+    window.addTimer = async function() {
+        const title = document.getElementById('newTimerTitle').value.trim();
+        const dateVal = document.getElementById('newTimerDate').value;
+        if (!title || !dateVal) {
+            showStatus('timerStatus', "Title and date required", false);
+            return;
+        }
         try {
-            const db = window._db;
-            const r = window._fb.ref(db, 'pollVotes/' + idx);
-            const snap = await window._fb.get(r);
-            await window._fb.set(r, (snap.val() || 0) + 1);
-            localStorage.setItem('kvg_poll_vote', pollId + ':' + idx);
-            if (typeof renderPoll === 'function') renderPoll(window._siteCfg || {});
+            const iso = new Date(dateVal).toISOString();
+            await push(ref(db, 'timers'), { title, targetDate: iso });
+            document.getElementById('newTimerTitle').value = '';
+            document.getElementById('newTimerDate').value = '';
+            showStatus('timerStatus', "Timer added");
         } catch (e) {
-            document.getElementById('pollStatus').textContent = 'Vote failed';
+            showStatus('timerStatus', "Error: " + e.message, false);
         }
     };
 
-    window.addEventListener('scroll', () => {
-        const btn = document.getElementById('backToTop');
-        if (btn) btn.classList.toggle('show', window.scrollY > 400);
-    });
-
-    window.isHiddenGame = function(title) {
-        const hidden = ((window._siteCfg && window._siteCfg.hiddenGames) || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
-        if (!hidden.length) return false;
-        const t = (title || '').toLowerCase().replace(/\s+/g, ' ').trim();
-        const tNoSpace = t.replace(/\s/g, '');
-        for (const h of hidden) {
-            const hh = h.replace(/\s+/g, ' ').trim();
-            const hNoSpace = hh.replace(/\s/g, '');
-            if (!hh) continue;
-            if (t === hh || tNoSpace === hNoSpace || t.includes(hh) || hh.includes(t) || tNoSpace.includes(hNoSpace) || hNoSpace.includes(tNoSpace)) return true;
+    window.deleteTimer = async function(key) {
+        try {
+            await remove(ref(db, 'timers/' + key));
+            showStatus('timerStatus', "Timer deleted");
+        } catch (e) {
+            showStatus('timerStatus', "Error: " + e.message, false);
         }
-        return false;
     };
 
-    window.renderDownloadableGames = function(filtered = null) {
-        const list = document.getElementById('download-list');
-        let games = filtered || downloadableGames.slice();
-        games = games.filter(g => !window.isHiddenGame(g.title));
-        const favs = getFavorites();
-        if (window._showFavsOnly) {
-            games = games.filter(g => favs.includes(g.title));
+    window.clearAllTimers = async function() {
+        if (!confirm("Delete ALL timers?")) return;
+        try {
+            await set(ref(db, 'timers'), null);
+            showStatus('quickStatus', "All timers cleared");
+        } catch (e) {
+            showStatus('quickStatus', "Error: " + e.message, false);
         }
-        const featuredRaw = (window._siteCfg && window._siteCfg.featuredGame) || '';
-        const featuredSet = new Set(featuredRaw.split(',').map(s => s.trim().toLowerCase()).filter(Boolean));
-        const isFeatTitle = (title) => {
-            const t = (title || '').toLowerCase().replace(/\s+/g, ' ').trim();
-            const tNS = t.replace(/\s/g, '');
-            if (featuredSet.has(t)) return true;
-            for (const f of featuredSet) {
-                if (!f) continue;
-                const ff = f.replace(/\s+/g, ' ').trim();
-                const fNS = ff.replace(/\s/g, '');
-                if (t === ff || tNS === fNS || t.includes(ff) || ff.includes(t) || tNS.includes(fNS) || fNS.includes(tNS)) return true;
-            }
-            return false;
-        };
-        // Always pin featured to the very top
-        if (featuredSet.size && !window._showFavsOnly) {
-            const top = [];
-            const rest = [];
-            games.forEach(g => (isFeatTitle(g.title) ? top : rest).push(g));
-            games = top.concat(rest);
-        }
-        const newList = ((window._siteCfg && window._siteCfg.newGames) || '').split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
-        const newSticker = `<div class="sticker-new" title="New"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon fill="#e53935" points="50,2 61,18 80,12 78,32 96,40 82,54 94,70 74,72 70,92 50,80 30,92 26,72 6,70 18,54 4,40 22,32 20,12 39,18"/><text x="50" y="58" text-anchor="middle" fill="#fff" font-family="Orbitron,Arial Black,sans-serif" font-size="22" font-weight="900" transform="rotate(-18 50 50)">NEW</text></svg></div>`;
-        const featRibbon = `<div class="sticker-featured">Featured</div>`;
-        const isNewTitle = (title) => {
-            const t = (title || '').toLowerCase();
-            if (newList.includes(t)) return true;
-            return newList.some(n => n && (t.includes(n) || n.includes(t)));
-        };
+    };
 
-        list.innerHTML = games.map(g => {
-            const safe = (g.title||'').replace(/[.#$\/\[\]]/g, '_');
-            const dls = (window.gameDownloadCounts && window.gameDownloadCounts[safe]) || 0;
-            const isFeatured = isFeatTitle(g.title);
-            const isNew = isNewTitle(g.title);
-            const isFav = favs.includes(g.title);
-            const tags = [
-                '<span class="tag">PC</span>',
-                '<span class="tag" style="color:var(--neon); border-color:rgba(0,255,136,0.2); background:rgba(0,255,136,0.07)">FREE</span>'
-            ];
-            if (isFeatured) tags.push('<span class="tag" style="color:var(--gold); border-color:rgba(255,215,0,0.35); background:rgba(255,215,0,0.1)">FEATURED</span>');
-            const esc = (s) => String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    // ---- Up and Coming ----
+    let upcomingData = {};
+
+    function loadUpcoming() {
+        onValue(ref(db, 'upcoming'), (snap) => {
+            upcomingData = snap.val() || {};
+            renderUpcomingAdminList();
+        });
+    }
+
+    function renderUpcomingAdminList() {
+        const list = document.getElementById('upcomingAdminList');
+        const keys = Object.keys(upcomingData);
+        if (keys.length === 0) {
+            list.innerHTML = '<p style="color:var(--muted); font-size:0.85rem; margin-bottom:10px;">No upcoming games.</p>';
+            return;
+        }
+        list.innerHTML = keys.map(key => {
+            const g = upcomingData[key];
             return `
-            <div class="card-item ${isFeatured ? 'featured-card' : ''}">
-                <div class="thumb-box">
-                    ${window._gabeMode
-                        ? `<img src="${window.GABE_URL}" class="thumb-img" alt="gabe">`
-                        : (g.thumb ? `<img src="${g.thumb}" class="thumb-img">` : `<span style="font-size:2rem; position:relative; z-index:2;">🎮</span>`)}
-                    ${isFeatured ? featRibbon : ''}
-                    ${isNew ? newSticker : ''}
+            <div class="timer-item">
+                <div class="info">
+                    <div class="title">${g.title || "Untitled"}</div>
+                    <div class="date">${g.status || "QUEUED"}</div>
                 </div>
-                <div class="card-body">
-                    <div class="card-tags">${tags.join('')}</div>
-                    <div class="card-title">${g.title} <button class="fav-btn ${isFav?'on':''}" onclick="event.stopPropagation(); toggleFavorite('${esc(g.title)}')" title="Favorite">${isFav?'♥':'♡'}</button></div>
-                    <div class="card-desc">Extract & play · ${dls} download${dls===1?'':'s'}</div>
-                    <div class="card-footer" style="flex-wrap:wrap; gap:8px;">
-                        <span style="font-family:'Space Mono'; font-size:0.7rem; color:var(--muted);">${g.size} MB</span>
-                        <div style="display:flex; gap:8px; align-items:center;">
-                            <button type="button" class="btn-report" onclick="reportBroken('${esc(g.title)}')" title="Report broken download">⚠ Report</button>
-                            ${window._freezeDownloads
-                                ? `<button type="button" class="btn-play" style="background:#333;color:#888;cursor:not-allowed;" disabled>LOCKED</button>`
-                                : `<button onclick="triggerDownload('${esc(g.url)}', '${esc(g.title)}', '${esc(g.thumb)}')" class="btn-play btn-download">Download</button>`}
+                <button class="btn btn-danger" style="padding:8px 14px; font-size:0.65rem;" onclick="deleteUpcoming('${key}')">Delete</button>
+            </div>`;
+        }).join('');
+    }
+
+    function loadWebGamesAdmin() {
+        onValue(ref(db, 'customWebGames'), (snap) => {
+            const data = snap.val() || {};
+            const entries = Object.entries(data);
+            customWebGameTitles = entries.map(([, g]) => (g && g.title) ? String(g.title).trim() : '').filter(Boolean);
+            // Keep Featured / New / Hidden / Game of the Day pickers in sync
+            if (typeof rebuildAdminGameTitles === 'function') rebuildAdminGameTitles();
+            const el = document.getElementById('webGamesAdminList');
+            if (!el) return;
+            if (!entries.length) {
+                el.innerHTML = '<p style="color:var(--muted);font-size:0.85rem;">No custom web games yet.</p>';
+                return;
+            }
+            el.innerHTML = entries.map(([key, g]) => `
+                <div class="timer-item">
+                    <div class="info">
+                        <div class="title">${g.thumb || '🎮'} ${g.title || 'Untitled'}</div>
+                        <div class="date">${g.tag || 'WEB'} · ${(g.url || '').slice(0, 40)}${(g.url||'').length>40?'…':''}</div>
+                    </div>
+                    <button class="btn btn-danger" style="padding:8px 14px; font-size:0.65rem;" onclick="deleteWebGame('${key}')">Delete</button>
+                </div>
+            `).join('');
+        });
+    }
+
+    window.addWebGame = async function() {
+        const title = document.getElementById('newWebTitle').value.trim();
+        const url = document.getElementById('newWebUrl').value.trim();
+        const thumb = document.getElementById('newWebThumb').value.trim() || '🎮';
+        const tag = document.getElementById('newWebTag').value.trim() || 'WEB';
+        if (!title || !url) {
+            showStatus('webGamesStatus', 'Title and URL required', false);
+            return;
+        }
+        if (!/^https?:\/\//i.test(url)) {
+            showStatus('webGamesStatus', 'URL must start with http:// or https://', false);
+            return;
+        }
+        try {
+            await push(ref(db, 'customWebGames'), { title, url, thumb, tag });
+            document.getElementById('newWebTitle').value = '';
+            document.getElementById('newWebUrl').value = '';
+            document.getElementById('newWebThumb').value = '🎮';
+            document.getElementById('newWebTag').value = 'WEB';
+            showStatus('webGamesStatus', 'Web game added — live on site');
+        } catch (e) {
+            showStatus('webGamesStatus', 'Error: ' + e.message, false);
+        }
+    };
+
+    window.deleteWebGame = async function(key) {
+        try {
+            await remove(ref(db, 'customWebGames/' + key));
+            showStatus('webGamesStatus', 'Web game removed');
+        } catch (e) {
+            showStatus('webGamesStatus', 'Error: ' + e.message, false);
+        }
+    };
+
+    window.addUpcoming = async function() {
+        const title = document.getElementById('newUpcomingTitle').value.trim();
+        const status = document.getElementById('newUpcomingStatus').value.trim() || "QUEUED";
+        if (!title) {
+            showStatus('upcomingStatus', "Title required", false);
+            return;
+        }
+        try {
+            await push(ref(db, 'upcoming'), { title, status });
+            document.getElementById('newUpcomingTitle').value = '';
+            document.getElementById('newUpcomingStatus').value = 'QUEUED';
+            showStatus('upcomingStatus', "Game added to Up and Coming");
+        } catch (e) {
+            showStatus('upcomingStatus', "Error: " + e.message, false);
+        }
+    };
+
+    window.deleteUpcoming = async function(key) {
+        try {
+            await remove(ref(db, 'upcoming/' + key));
+            showStatus('upcomingStatus', "Game removed");
+        } catch (e) {
+            showStatus('upcomingStatus', "Error: " + e.message, false);
+        }
+    };
+
+    // ---- Live Activity (presence + downloads) ----
+    let adminLastDownloadKey = null;
+
+    function loadLiveActivity() {
+        onValue(ref(db, 'presence'), (snap) => {
+            const data = snap.val() || {};
+            const count = Object.keys(data).length;
+            document.getElementById('adminOnlineCount').textContent = count;
+        });
+
+        onValue(ref(db, 'downloadCount'), (snap) => {
+            document.getElementById('adminDownloadCount').textContent = snap.val() || 0;
+        });
+
+        onValue(query(ref(db, 'downloads'), orderByChild('ts'), limitToLast(20)), (snap) => {
+            const data = snap.val() || {};
+            const entries = Object.entries(data).sort((a,b) => (b[1].ts||0) - (a[1].ts||0));
+            const list = document.getElementById('adminRecentDownloads');
+            if (!entries.length) {
+                list.innerHTML = '<p style="color:var(--muted); font-size:0.8rem;">No downloads yet.</p>';
+            } else {
+                list.innerHTML = entries.map(([key, item]) => {
+                    const time = item.ts ? new Date(item.ts).toLocaleTimeString() : '';
+                    const thumb = item.thumb
+                        ? (item.thumb.startsWith('http')
+                            ? `<img src="${item.thumb}" style="width:28px;height:28px;object-fit:contain;border-radius:4px;background:#000;">`
+                            : `<span style="font-size:1.2rem;">${item.thumb}</span>`)
+                        : '🎮';
+                    return `<div class="timer-item" style="padding:8px 12px;">
+                        <div style="display:flex;align-items:center;gap:10px;flex:1;">
+                            ${thumb}
+                            <div class="info">
+                                <div class="title" style="font-size:0.8rem;">${item.title || 'Game'}</div>
+                                <div class="date">${time}</div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            </div>`;
-        }).join('');
-    };
-
-    window.renderWebGames = function() {
-        const favs = getFavorites();
-        let list = (window.webGames || []).slice().filter(g => !window.isHiddenGame(g.title));
-        if (window._showFavsOnly) list = list.filter(g => favs.includes(g.title));
-        const q = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
-        if (q) list = list.filter(g => g.title.toLowerCase().includes(q));
-        const newList = ((window._siteCfg && window._siteCfg.newGames) || '').split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
-        const featuredRaw = (window._siteCfg && window._siteCfg.featuredGame) || '';
-        const featuredSet = new Set(featuredRaw.split(',').map(s => s.trim().toLowerCase()).filter(Boolean));
-        const newSticker = `<div class="sticker-new" title="New"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon fill="#e53935" points="50,2 61,18 80,12 78,32 96,40 82,54 94,70 74,72 70,92 50,80 30,92 26,72 6,70 18,54 4,40 22,32 20,12 39,18"/><text x="50" y="58" text-anchor="middle" fill="#fff" font-family="Orbitron,Arial Black,sans-serif" font-size="22" font-weight="900" transform="rotate(-18 50 50)">NEW</text></svg></div>`;
-        const featRibbon = `<div class="sticker-featured">Featured</div>`;
-        const matchSet = (title, set) => {
-            const t = (title || '').toLowerCase().replace(/\s+/g, ' ').trim();
-            const tNS = t.replace(/\s/g, '');
-            for (const f of set) {
-                if (!f) continue;
-                const ff = String(f).replace(/\s+/g, ' ').trim();
-                const fNS = ff.replace(/\s/g, '');
-                if (t === ff || tNS === fNS || t.includes(ff) || ff.includes(t) || tNS.includes(fNS) || fNS.includes(tNS)) return true;
+                    </div>`;
+                }).join('');
             }
-            return false;
-        };
-        // Pin featured web games to top
-        if (featuredSet.size && !window._showFavsOnly) {
-            const top = [], rest = [];
-            list.forEach(g => (matchSet(g.title, featuredSet) ? top : rest).push(g));
-            list = top.concat(rest);
+
+            // Floating bubbles for new downloads
+            if (adminLastDownloadKey === null) {
+                if (entries.length) adminLastDownloadKey = entries[0][0];
+                return;
+            }
+            for (const [key, item] of entries) {
+                if (key === adminLastDownloadKey) break;
+                spawnAdminBubble(item);
+            }
+            if (entries.length) adminLastDownloadKey = entries[0][0];
+        });
+
+        onValue(query(ref(db, 'activityLog'), orderByChild('ts'), limitToLast(50)), (snap) => {
+            const data = snap.val() || {};
+            const entries = Object.entries(data).map(([key, e]) => ({ key, ...e })).sort((a,b)=>(b.ts||0)-(a.ts||0));
+            const reports = entries.filter(e => e.type === 'report');
+            const reportBox = document.getElementById('adminReportsList');
+            const badge = document.getElementById('reportCountBadge');
+            if (reportBox) {
+                if (!reports.length) {
+                    reportBox.innerHTML = '<p style="color:var(--muted);font-size:0.8rem;">No broken-game reports yet.</p>';
+                    if (badge) badge.style.display = 'none';
+                } else {
+                    if (badge) { badge.style.display = 'inline'; badge.textContent = String(reports.length); }
+                    reportBox.innerHTML = reports.map(e => {
+                        const t = e.ts ? new Date(e.ts).toLocaleString() : '';
+                        return `<div style="padding:10px 12px;background:rgba(255,58,110,0.1);border:1px solid rgba(255,58,110,0.35);border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                            <div style="min-width:0;">
+                                <div style="font-family:Orbitron,monospace;color:var(--hot);font-size:0.8rem;">⚠ ${(e.title||'Unknown').replace(/</g,'')}</div>
+                                <div style="font-family:Space Mono,monospace;font-size:0.68rem;color:var(--muted);margin-top:4px;">${t}</div>
+                            </div>
+                            <button type="button" class="btn btn-danger" style="padding:6px 12px;font-size:0.65rem;flex-shrink:0;" onclick="deleteReport('${e.key}')">Remove</button>
+                        </div>`;
+                    }).join('');
+                }
+            }
+            const box = document.getElementById('adminActivityLog');
+            if (!box) return;
+            if (!entries.length) { box.innerHTML = 'No activity yet.'; return; }
+            box.innerHTML = entries.map(e => {
+                const t = e.ts ? new Date(e.ts).toLocaleString() : '';
+                const color = e.type === 'report' ? 'var(--hot)' : 'var(--ice)';
+                const label = e.type === 'report' ? 'REPORT' : (e.type || 'event');
+                return `<div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--glass-border);"><span style="color:${color};">[${label}]</span> ${e.type==='report' ? 'Broken: ' : ''}${e.title||''} <span style="opacity:0.6;">${t}</span></div>`;
+            }).join('');
+        });
+    }
+
+    window.deleteReport = async function(key) {
+        try {
+            await remove(ref(db, 'activityLog/' + key));
+            showStatus('quickStatus', 'Report removed');
+        } catch(e) {
+            showStatus('quickStatus', 'Error: ' + e.message, false);
         }
-        document.getElementById('web-games-list').innerHTML = list.map(g => {
-            const isFav = favs.includes(g.title);
-            const isNew = matchSet(g.title, new Set(newList));
-            const isFeatured = matchSet(g.title, featuredSet);
-            const esc = (s) => String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-            return `
-            <div class="card-item ${isFeatured ? 'featured-card' : ''}">
-                <div class="thumb-box" style="font-size:3rem; position:relative; z-index:2;">
-                    ${window._gabeMode
-                        ? `<img src="${window.GABE_URL}" class="thumb-img" alt="gabe">`
-                        : g.thumb}
-                    ${isFeatured ? featRibbon : ''}
-                    ${isNew ? newSticker : ''}
-                </div>
-                <div class="card-body">
-                    <div class="card-tags">
-                        <span class="tag">${g.tag}</span>
-                        <span class="tag" style="color:var(--ice); border-color:rgba(0,180,255,0.2); background:rgba(0,180,255,0.07)">BROWSER</span>
-                        ${isFeatured ? '<span class="tag" style="color:var(--gold); border-color:rgba(255,215,0,0.35); background:rgba(255,215,0,0.1)">FEATURED</span>' : ''}
-                    </div>
-                    <div class="card-title">${g.title} <button class="fav-btn ${isFav?'on':''}" onclick="event.stopPropagation(); toggleFavorite('${esc(g.title)}')" title="Favorite">${isFav?'♥':'♡'}</button></div>
-                    <div class="card-desc">No install required</div>
-                    <div class="card-footer">
-                        <span style="font-family:'Space Mono'; font-size:0.7rem; color:var(--muted);">Instant</span>
-                        <a href="${g.url}" target="_blank" class="btn-play btn-play-web" style="text-align:center; text-decoration:none">Play Now</a>
-                    </div>
-                </div>
-            </div>`;
-        }).join('');
     };
 
-    window.switchTab = function(n) {
-        document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === n));
-        document.getElementById('download-section').style.display = n === 0 ? 'block' : 'none';
-        document.getElementById('web-section').style.display = n === 1 ? 'block' : 'none';
+    window.clearAllReports = async function() {
+        if (!confirm('Remove all broken-game reports?')) return;
+        try {
+            const snap = await new Promise(res => onValue(ref(db, 'activityLog'), s => res(s), { onlyOnce: true }));
+            const data = snap.val() || {};
+            const ops = [];
+            Object.entries(data).forEach(([key, e]) => {
+                if (e && e.type === 'report') ops.push(remove(ref(db, 'activityLog/' + key)));
+            });
+            await Promise.all(ops);
+            showStatus('quickStatus', 'All reports cleared');
+        } catch(e) {
+            showStatus('quickStatus', 'Error: ' + e.message, false);
+        }
     };
 
-    window.filterGames = function() {
-        const q = document.getElementById('searchInput').value.toLowerCase().trim();
-        let base = downloadableGames;
-        if (q) base = base.filter(g => g.title.toLowerCase().includes(q));
-        renderDownloadableGames(q === '' && !window._showFavsOnly ? null : base);
-        renderWebGames();
-    };
+    function spawnAdminBubble(item) {
+        const container = document.getElementById('downloadBubbles');
+        if (!container) return;
+        const bubble = document.createElement('div');
+        bubble.style.cssText = 'display:flex;align-items:center;gap:10px;background:rgba(4,4,10,0.92);border:1px solid rgba(0,255,136,0.35);border-radius:14px;padding:10px 14px;box-shadow:0 8px 30px rgba(0,0,0,0.5);animation:bubbleUp 4.5s ease-out forwards;max-width:260px;';
+        const thumbHtml = item.thumb
+            ? (item.thumb.startsWith('http')
+                ? `<img src="${item.thumb}" style="width:42px;height:42px;object-fit:contain;border-radius:8px;background:#000;">`
+                : `<div style="font-size:1.8rem;width:42px;height:42px;display:flex;align-items:center;justify-content:center;">${item.thumb}</div>`)
+            : `<div style="font-size:1.8rem;width:42px;height:42px;display:flex;align-items:center;justify-content:center;">🎮</div>`;
+        bubble.innerHTML = `${thumbHtml}<div style="flex:1;min-width:0;"><div style="font-family:Orbitron,monospace;font-size:0.75rem;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.title||'Game'}</div><div style="font-family:Space Mono,monospace;font-size:0.65rem;color:var(--neon);margin-top:2px;">Someone just downloaded</div></div>`;
+        container.appendChild(bubble);
+        setTimeout(() => bubble.remove(), 4600);
+    }
 
-    window.onload = () => { 
-        fetchGames(); 
-    };
+    // bubble animation for admin
+    const style = document.createElement('style');
+    style.textContent = `@keyframes bubbleUp{0%{opacity:0;transform:translateY(30px) scale(0.85)}12%{opacity:1;transform:translateY(0) scale(1)}75%{opacity:1;transform:translateY(-20px)}100%{opacity:0;transform:translateY(-60px) scale(0.9)}}`;
+    document.head.appendChild(style);
 </script>
 </body>
 </html>
