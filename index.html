@@ -615,6 +615,7 @@
             <div class="btn-group" style="margin-bottom:12px;">
                 <button class="btn btn-secondary" type="button" onclick="chaosInvert()">Invert Screen 10s</button>
                 <button class="btn btn-secondary" type="button" onclick="chaosFlip()">Upside-Down 10s</button>
+                <button class="btn btn-secondary" type="button" onclick="chaosBsod()">💀 BSOD 5s</button>
                 <button class="btn btn-secondary" type="button" onclick="chaosForceChat()">Force Open Chat</button>
                 <button class="btn btn-secondary" type="button" onclick="chaosDuckNames()">🦆 Duck-ify a Name</button>
             </div>
@@ -624,7 +625,10 @@
             <div class="toggle-row"><span class="toggle-label">Silent mode (no sounds)</span><label class="switch"><input type="checkbox" id="cfgSilentMode" onchange="setChaosToggle('silentMode', this.checked)"><span class="slider"></span></label></div>
             <div class="toggle-row"><span class="toggle-label">Spam confetti (every 5s)</span><label class="switch"><input type="checkbox" id="cfgConfettiSpam" onchange="setChaosToggle('confettiSpam', this.checked)"><span class="slider"></span></label></div>
             <div class="toggle-row"><span class="toggle-label">School mode (hide chat/ducks)</span><label class="switch"><input type="checkbox" id="cfgSchoolMode" onchange="setChaosToggle('schoolMode', this.checked)"><span class="slider"></span></label></div>
-            <div class="toggle-row"><span class="toggle-label">Prank download (rickroll once)</span><label class="switch"><input type="checkbox" id="cfgPrankDownload" onchange="setChaosToggle('prankDownload', this.checked)"><span class="slider"></span></label></div>
+            <div class="toggle-row"><span class="toggle-label">Prank download (rickroll)</span><label class="switch"><input type="checkbox" id="cfgPrankDownload" onchange="setChaosToggle('prankDownload', this.checked)"><span class="slider"></span></label></div>
+            <div class="btn-group" style="margin-bottom:10px;">
+                <button class="btn btn-secondary" type="button" onclick="resetPrankWave()">Reset Rickroll Wave</button>
+            </div>
             <div class="toggle-row"><span class="toggle-label">Lock chat</span><label class="switch"><input type="checkbox" id="cfgChatLock" onchange="setChatLock(this.checked)"><span class="slider"></span></label></div>
             <label>Chat lock message</label>
             <input type="text" id="cfgChatLockMsg" placeholder="Closed for duck hunt">
@@ -1010,6 +1014,12 @@
             showStatus('quickStatus', 'Upside-down sent (10s)');
         } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
     };
+    window.chaosBsod = async function() {
+        try {
+            await update(ref(db, 'siteConfig'), { bsodToken: Date.now(), bsodSeconds: 5 });
+            showStatus('quickStatus', 'BSOD sent (5s)');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
     window.chaosForceChat = async function() {
         try {
             await update(ref(db, 'siteConfig'), { forceChatToken: Date.now() });
@@ -1049,6 +1059,18 @@
                 system: true
             });
             showStatus('quickStatus', 'System message sent to chat');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+
+    window.resetPrankWave = async function() {
+        try {
+            await update(ref(db, 'siteConfig'), {
+                prankDownload: true,
+                prankToken: String(Date.now())
+            });
+            const el = document.getElementById('cfgPrankDownload');
+            if (el) el.checked = true;
+            showStatus('quickStatus', 'New rickroll wave active — next download click pranks again');
         } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
     };
 
