@@ -544,6 +544,38 @@
             <div id="guestbookAdminStatus" class="status"></div>
         </div>
 
+        <!-- DUCK HUNT -->
+        <div class="card">
+            <h2>◈ Duck Hunt</h2>
+            <p style="font-size:0.8rem;color:var(--muted);margin-bottom:12px;">Post hints for ducks hidden around school. Add special ducks and approve photo claims.</p>
+
+            <label>New hint</label>
+            <textarea id="newDuckHint" placeholder="Hint: near the blue lockers on floor 2…"></textarea>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="addDuckHint()">Post Hint</button>
+            </div>
+            <div id="duckHintsAdminList" style="margin:12px 0; max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
+
+            <hr style="border:none; border-top:1px solid var(--glass-border); margin:18px 0;">
+
+            <label>Special duck title</label>
+            <input type="text" id="newSpecialDuckTitle" placeholder="Golden Duck">
+            <label>Description</label>
+            <textarea id="newSpecialDuckDesc" placeholder="Find the gold duck by the library and post a photo to win."></textarea>
+            <label>Prize (optional)</label>
+            <input type="text" id="newSpecialDuckPrize" placeholder="Free shoutout + bragging rights">
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="addSpecialDuck()">Add Special Duck</button>
+            </div>
+            <div id="specialDucksAdminList" style="margin:12px 0; max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
+
+            <hr style="border:none; border-top:1px solid var(--glass-border); margin:18px 0;">
+
+            <h3 style="font-family:'Orbitron'; font-size:0.7rem; color:var(--hot); letter-spacing:2px; margin-bottom:10px;">CLAIMS</h3>
+            <div id="duckClaimsAdminList" style="max-height:280px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
+            <div id="duckHuntStatus" class="status"></div>
+        </div>
+
         <!-- QUICK ACTIONS -->
         <div class="card">
             <h2>◈ Quick Actions</h2>
@@ -577,6 +609,32 @@
                 <span class="toggle-label">Freeze all downloads</span>
                 <label class="switch"><input type="checkbox" id="cfgFreezeDownloads" onchange="toggleFreezeDownloads()"><span class="slider"></span></label>
             </div>
+
+            <hr style="border:none; border-top:1px solid var(--glass-border); margin:18px 0;">
+            <h3 style="font-family:'Orbitron'; font-size:0.75rem; color:var(--hot); letter-spacing:2px; margin-bottom:12px;">◈ CHAOS CONTROLS</h3>
+            <div class="btn-group" style="margin-bottom:12px;">
+                <button class="btn btn-secondary" type="button" onclick="chaosInvert()">Invert Screen 10s</button>
+                <button class="btn btn-secondary" type="button" onclick="chaosFlip()">Upside-Down 10s</button>
+                <button class="btn btn-secondary" type="button" onclick="chaosForceChat()">Force Open Chat</button>
+                <button class="btn btn-secondary" type="button" onclick="chaosDuckNames()">🦆 Duck-ify a Name</button>
+            </div>
+            <div class="toggle-row"><span class="toggle-label">Comic Sans mode</span><label class="switch"><input type="checkbox" id="cfgComicSans" onchange="setChaosToggle('comicSans', this.checked)"><span class="slider"></span></label></div>
+            <div class="toggle-row"><span class="toggle-label">Giant duck cursor</span><label class="switch"><input type="checkbox" id="cfgDuckCursor" onchange="setChaosToggle('duckCursor', this.checked)"><span class="slider"></span></label></div>
+            <div class="toggle-row"><span class="toggle-label">Fake lag on buttons</span><label class="switch"><input type="checkbox" id="cfgFakeLag" onchange="setChaosToggle('fakeLag', this.checked)"><span class="slider"></span></label></div>
+            <div class="toggle-row"><span class="toggle-label">Silent mode (no sounds)</span><label class="switch"><input type="checkbox" id="cfgSilentMode" onchange="setChaosToggle('silentMode', this.checked)"><span class="slider"></span></label></div>
+            <div class="toggle-row"><span class="toggle-label">Spam confetti (every 5s)</span><label class="switch"><input type="checkbox" id="cfgConfettiSpam" onchange="setChaosToggle('confettiSpam', this.checked)"><span class="slider"></span></label></div>
+            <div class="toggle-row"><span class="toggle-label">School mode (hide chat/ducks)</span><label class="switch"><input type="checkbox" id="cfgSchoolMode" onchange="setChaosToggle('schoolMode', this.checked)"><span class="slider"></span></label></div>
+            <div class="toggle-row"><span class="toggle-label">Prank download (rickroll once)</span><label class="switch"><input type="checkbox" id="cfgPrankDownload" onchange="setChaosToggle('prankDownload', this.checked)"><span class="slider"></span></label></div>
+            <div class="toggle-row"><span class="toggle-label">Lock chat</span><label class="switch"><input type="checkbox" id="cfgChatLock" onchange="setChatLock(this.checked)"><span class="slider"></span></label></div>
+            <label>Chat lock message</label>
+            <input type="text" id="cfgChatLockMsg" placeholder="Closed for duck hunt">
+            <label>Fake online count (blank = real)</label>
+            <input type="text" id="cfgFakeOnline" placeholder="420">
+            <div class="btn-group"><button class="btn btn-secondary" type="button" onclick="saveFakeOnline()">Set Fake Online</button></div>
+            <label>System chat message</label>
+            <input type="text" id="cfgSystemChat" placeholder="A duck has been found">
+            <div class="btn-group"><button class="btn btn-primary" type="button" onclick="sendSystemChat()">Send System Message</button></div>
+
             <div style="margin-top:14px;">
                 <label>Poll question</label>
                 <input type="text" id="cfgPollQuestion" placeholder="Next game should be…">
@@ -629,6 +687,7 @@
             loadGameList();
             loadGuestbookAdmin();
             loadWebGamesAdmin();
+            loadDuckHuntAdmin();
         } else {
             status.textContent = "Wrong password";
             status.className = "status err";
@@ -675,6 +734,19 @@
             if (pq) pq.value = cfg.pollQuestion || '';
             const po = document.getElementById('cfgPollOptions');
             if (po) po.value = cfg.pollOptions || '';
+            const setChk = (id, v) => { const el = document.getElementById(id); if (el) el.checked = !!v; };
+            setChk('cfgComicSans', cfg.comicSans);
+            setChk('cfgDuckCursor', cfg.duckCursor);
+            setChk('cfgFakeLag', cfg.fakeLag);
+            setChk('cfgSilentMode', cfg.silentMode);
+            setChk('cfgConfettiSpam', cfg.confettiSpam);
+            setChk('cfgSchoolMode', cfg.schoolMode);
+            setChk('cfgPrankDownload', cfg.prankDownload);
+            setChk('cfgChatLock', cfg.chatLock);
+            const clm = document.getElementById('cfgChatLockMsg');
+            if (clm) clm.value = cfg.chatLockMsg || '';
+            const fo = document.getElementById('cfgFakeOnline');
+            if (fo) fo.value = (cfg.fakeOnlineCount != null && cfg.fakeOnlineCount !== '') ? cfg.fakeOnlineCount : '';
             const noteBox = document.getElementById('staffNoteDisplay');
             if (cfg.staffNote) {
                 noteBox.style.display = 'block';
@@ -917,6 +989,66 @@
             const secs = parseInt(document.getElementById('cfgGabeSeconds').value, 10) || 10;
             await update(ref(db, 'siteConfig'), { gabeToken: Date.now(), gabeDuration: secs });
             showStatus('quickStatus', 'Gabe Mode sent for ' + secs + 's on all open tabs');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+
+    window.setChaosToggle = async function(key, value) {
+        try {
+            await update(ref(db, 'siteConfig'), { [key]: !!value });
+            showStatus('quickStatus', key + ' → ' + (value ? 'ON' : 'OFF'));
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+    window.chaosInvert = async function() {
+        try {
+            await update(ref(db, 'siteConfig'), { invertToken: Date.now(), invertSeconds: 10 });
+            showStatus('quickStatus', 'Invert sent (10s)');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+    window.chaosFlip = async function() {
+        try {
+            await update(ref(db, 'siteConfig'), { flipToken: Date.now(), flipSeconds: 10 });
+            showStatus('quickStatus', 'Upside-down sent (10s)');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+    window.chaosForceChat = async function() {
+        try {
+            await update(ref(db, 'siteConfig'), { forceChatToken: Date.now() });
+            showStatus('quickStatus', 'Force-open chat sent');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+    window.chaosDuckNames = async function() {
+        try {
+            await update(ref(db, 'siteConfig'), { duckNameToken: Date.now() });
+            showStatus('quickStatus', 'One random chatter will become 🦆');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+    window.setChatLock = async function(on) {
+        try {
+            await update(ref(db, 'siteConfig'), {
+                chatLock: !!on,
+                chatLockMsg: document.getElementById('cfgChatLockMsg').value.trim() || 'Chat is locked'
+            });
+            showStatus('quickStatus', on ? 'Chat locked' : 'Chat unlocked');
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+    window.saveFakeOnline = async function() {
+        try {
+            const v = document.getElementById('cfgFakeOnline').value.trim();
+            await update(ref(db, 'siteConfig'), { fakeOnlineCount: v === '' ? null : v });
+            showStatus('quickStatus', v === '' ? 'Using real online count' : ('Fake online = ' + v));
+        } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
+    };
+    window.sendSystemChat = async function() {
+        const msg = document.getElementById('cfgSystemChat').value.trim();
+        if (!msg) { showStatus('quickStatus', 'Message required', false); return; }
+        try {
+            await push(ref(db, 'guestbook'), {
+                name: 'SYSTEM',
+                msg,
+                ts: Date.now(),
+                system: true
+            });
+            showStatus('quickStatus', 'System message sent to chat');
         } catch(e) { showStatus('quickStatus', 'Error: '+e.message, false); }
     };
 
@@ -1295,6 +1427,114 @@
         } catch (e) {
             showStatus('webGamesStatus', 'Error: ' + e.message, false);
         }
+    };
+
+    function loadDuckHuntAdmin() {
+        onValue(ref(db, 'duckHints'), (snap) => {
+            const data = snap.val() || {};
+            const entries = Object.entries(data).sort((a,b) => (b[1].ts||0)-(a[1].ts||0));
+            const el = document.getElementById('duckHintsAdminList');
+            if (!el) return;
+            if (!entries.length) { el.innerHTML = '<p style="color:var(--muted);font-size:0.8rem;">No hints yet.</p>'; return; }
+            el.innerHTML = entries.map(([key, h]) => `
+                <div class="timer-item">
+                    <div class="info">
+                        <div class="title">${(h.text||'').slice(0,80)}</div>
+                        <div class="date">${h.ts ? new Date(h.ts).toLocaleString() : ''}</div>
+                    </div>
+                    <button class="btn btn-danger" style="padding:6px 12px;font-size:0.65rem;" onclick="deleteDuckHint('${key}')">Delete</button>
+                </div>`).join('');
+        });
+
+        onValue(ref(db, 'specialDucks'), (snap) => {
+            const data = snap.val() || {};
+            const entries = Object.entries(data);
+            const el = document.getElementById('specialDucksAdminList');
+            if (!el) return;
+            if (!entries.length) { el.innerHTML = '<p style="color:var(--muted);font-size:0.8rem;">No special ducks.</p>'; return; }
+            el.innerHTML = entries.map(([key, d]) => `
+                <div class="timer-item" style="flex-direction:column;align-items:stretch;gap:8px;">
+                    <div>
+                        <div class="title">${d.active === false ? '[OFF] ' : ''}${d.title || 'Duck'}</div>
+                        <div class="date">${(d.description||'').slice(0,60)}</div>
+                        ${d.prize ? `<div class="date">Prize: ${d.prize}</div>` : ''}
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" style="padding:6px 12px;font-size:0.65rem;" onclick="toggleSpecialDuck('${key}', ${d.active === false})">${d.active === false ? 'Activate' : 'Deactivate'}</button>
+                        <button class="btn btn-danger" style="padding:6px 12px;font-size:0.65rem;" onclick="deleteSpecialDuck('${key}')">Delete</button>
+                    </div>
+                </div>`).join('');
+        });
+
+        onValue(ref(db, 'duckClaims'), (snap) => {
+            const data = snap.val() || {};
+            const entries = Object.entries(data).sort((a,b) => (b[1].ts||0)-(a[1].ts||0));
+            const el = document.getElementById('duckClaimsAdminList');
+            if (!el) return;
+            if (!entries.length) { el.innerHTML = '<p style="color:var(--muted);font-size:0.8rem;">No claims yet.</p>'; return; }
+            el.innerHTML = entries.map(([key, c]) => {
+                const status = c.status || 'pending';
+                const color = status === 'winner' ? 'var(--neon)' : status === 'rejected' ? 'var(--muted)' : 'var(--hot)';
+                return `<div class="timer-item" style="flex-direction:column;align-items:stretch;gap:8px;">
+                    <div style="display:flex;gap:10px;align-items:flex-start;">
+                        ${c.photo ? `<img src="${c.photo}" style="width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid var(--glass-border);">` : ''}
+                        <div style="min-width:0;">
+                            <div class="title">${(c.name||'?')} · ${(c.duckTitle||'Duck')}</div>
+                            <div class="date">${c.ts ? new Date(c.ts).toLocaleString() : ''} · <span style="color:${color};">${status.toUpperCase()}</span></div>
+                            ${c.note ? `<div style="color:var(--text);font-size:0.8rem;margin-top:4px;">${c.note}</div>` : ''}
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        ${status !== 'winner' ? `<button class="btn btn-primary" style="padding:6px 12px;font-size:0.65rem;" onclick="setDuckClaim('${key}','winner')">Mark Winner</button>` : ''}
+                        ${status !== 'rejected' ? `<button class="btn btn-secondary" style="padding:6px 12px;font-size:0.65rem;" onclick="setDuckClaim('${key}','rejected')">Reject</button>` : ''}
+                        <button class="btn btn-danger" style="padding:6px 12px;font-size:0.65rem;" onclick="deleteDuckClaim('${key}')">Delete</button>
+                    </div>
+                </div>`;
+            }).join('');
+        });
+    }
+
+    window.addDuckHint = async function() {
+        const text = document.getElementById('newDuckHint').value.trim();
+        if (!text) { showStatus('duckHuntStatus', 'Hint text required', false); return; }
+        try {
+            await push(ref(db, 'duckHints'), { text, ts: Date.now() });
+            document.getElementById('newDuckHint').value = '';
+            showStatus('duckHuntStatus', 'Hint posted');
+        } catch(e) { showStatus('duckHuntStatus', 'Error: '+e.message, false); }
+    };
+    window.deleteDuckHint = async function(key) {
+        try { await remove(ref(db, 'duckHints/' + key)); showStatus('duckHuntStatus', 'Hint deleted'); }
+        catch(e) { showStatus('duckHuntStatus', 'Error: '+e.message, false); }
+    };
+    window.addSpecialDuck = async function() {
+        const title = document.getElementById('newSpecialDuckTitle').value.trim();
+        const description = document.getElementById('newSpecialDuckDesc').value.trim();
+        const prize = document.getElementById('newSpecialDuckPrize').value.trim();
+        if (!title) { showStatus('duckHuntStatus', 'Title required', false); return; }
+        try {
+            await push(ref(db, 'specialDucks'), { title, description, prize, active: true, ts: Date.now() });
+            document.getElementById('newSpecialDuckTitle').value = '';
+            document.getElementById('newSpecialDuckDesc').value = '';
+            document.getElementById('newSpecialDuckPrize').value = '';
+            showStatus('duckHuntStatus', 'Special duck added');
+        } catch(e) { showStatus('duckHuntStatus', 'Error: '+e.message, false); }
+    };
+    window.toggleSpecialDuck = async function(key, makeActive) {
+        try { await update(ref(db, 'specialDucks/' + key), { active: !!makeActive }); showStatus('duckHuntStatus', makeActive ? 'Activated' : 'Deactivated'); }
+        catch(e) { showStatus('duckHuntStatus', 'Error: '+e.message, false); }
+    };
+    window.deleteSpecialDuck = async function(key) {
+        try { await remove(ref(db, 'specialDucks/' + key)); showStatus('duckHuntStatus', 'Special duck deleted'); }
+        catch(e) { showStatus('duckHuntStatus', 'Error: '+e.message, false); }
+    };
+    window.setDuckClaim = async function(key, status) {
+        try { await update(ref(db, 'duckClaims/' + key), { status }); showStatus('duckHuntStatus', 'Claim marked ' + status); }
+        catch(e) { showStatus('duckHuntStatus', 'Error: '+e.message, false); }
+    };
+    window.deleteDuckClaim = async function(key) {
+        try { await remove(ref(db, 'duckClaims/' + key)); showStatus('duckHuntStatus', 'Claim deleted'); }
+        catch(e) { showStatus('duckHuntStatus', 'Error: '+e.message, false); }
     };
 
     window.addUpcoming = async function() {
