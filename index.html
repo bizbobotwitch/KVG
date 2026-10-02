@@ -393,6 +393,31 @@
             <div id="webGamesStatus" class="status"></div>
         </div>
 
+        <!-- CUSTOM DOWNLOADABLE GAMES -->
+        <div class="card">
+            <h2>◈ Downloadable Games (add your own)</h2>
+            <p style="font-size:0.8rem;color:var(--muted);margin-bottom:12px;">Extra download sources in addition to the GitHub release list. Direct file URLs work best.</p>
+            <div id="dlGamesAdminList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;max-height:240px;overflow-y:auto;"></div>
+            <label>Title</label>
+            <input type="text" id="newDlTitle" placeholder="My PC Game">
+            <label>Download URL (https://…)</label>
+            <input type="text" id="newDlUrl" placeholder="https://example.com/game.zip">
+            <div class="row">
+                <div>
+                    <label>Size (MB, optional)</label>
+                    <input type="text" id="newDlSize" placeholder="250">
+                </div>
+                <div>
+                    <label>Thumbnail URL (optional)</label>
+                    <input type="text" id="newDlThumb" placeholder="https://…/cover.png">
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="addDownloadableGame()">Add Downloadable</button>
+            </div>
+            <div id="dlGamesStatus" class="status"></div>
+        </div>
+
         <!-- GLOBAL ANNOUNCEMENT -->
         <div class="card">
             <h2>◈ Global Announcement</h2>
@@ -558,22 +583,40 @@
 
             <hr style="border:none; border-top:1px solid var(--glass-border); margin:18px 0;">
 
-            <label>Special duck title</label>
+            <label>Duck title</label>
             <input type="text" id="newSpecialDuckTitle" placeholder="Golden Duck">
+            <label>Type</label>
+            <select id="newDuckType">
+                <option value="normal">Normal (common school duck)</option>
+                <option value="limited">Limited time (expires)</option>
+                <option value="special" selected>Special (prize / big find)</option>
+            </select>
             <label>Description</label>
             <textarea id="newSpecialDuckDesc" placeholder="Find the gold duck by the library and post a photo to win."></textarea>
-            <label>Prize (optional)</label>
+            <label>Area / zone (optional)</label>
+            <input type="text" id="newDuckArea" placeholder="Library wing, floor 2">
+            <label>Prize (optional — special/limited)</label>
             <input type="text" id="newSpecialDuckPrize" placeholder="Free shoutout + bragging rights">
+            <label>Expires at (limited only)</label>
+            <input type="datetime-local" id="newDuckExpires">
             <div class="btn-group">
-                <button class="btn btn-primary" onclick="addSpecialDuck()">Add Special Duck</button>
+                <button class="btn btn-primary" onclick="addSpecialDuck()">Add Duck</button>
             </div>
-            <div id="specialDucksAdminList" style="margin:12px 0; max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
+            <div id="specialDucksAdminList" style="margin:12px 0; max-height:220px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
 
             <hr style="border:none; border-top:1px solid var(--glass-border); margin:18px 0;">
 
             <h3 style="font-family:'Orbitron'; font-size:0.7rem; color:var(--hot); letter-spacing:2px; margin-bottom:10px;">CLAIMS</h3>
             <div id="duckClaimsAdminList" style="max-height:280px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
             <div id="duckHuntStatus" class="status"></div>
+        </div>
+
+        <!-- GAME SUGGESTIONS -->
+        <div class="card">
+            <h2>◈ Game Suggestions</h2>
+            <p style="font-size:0.8rem;color:var(--muted);margin-bottom:12px;">Suggestions from the built-in form on the main site.</p>
+            <div id="suggestionsAdminList" style="max-height:320px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
+            <div id="suggestionsStatus" class="status"></div>
         </div>
 
         <!-- QUICK ACTIONS -->
@@ -691,7 +734,9 @@
             loadGameList();
             loadGuestbookAdmin();
             loadWebGamesAdmin();
+            loadDownloadableGamesAdmin();
             loadDuckHuntAdmin();
+            loadSuggestionsAdmin();
         } else {
             status.textContent = "Wrong password";
             status.className = "status err";
@@ -849,13 +894,15 @@
     let adminGameTitles = [];
     let githubGameTitles = [];
     let customWebGameTitles = [];
+    let customDlGameTitles = [];
     const webGameTitles = ["Subway Surfers","Keith Valley Fisher","Polytrack","Ages of Conflict","Piggy Escape","Core Ball","CircleoO","BitLife","Slope","Death Run 3D","Drift Boss","Rocketpult","2048","Cookie Clicker"];
 
     function rebuildAdminGameTitles() {
         adminGameTitles = [...new Set([
             ...githubGameTitles,
             ...webGameTitles,
-            ...customWebGameTitles
+            ...customWebGameTitles,
+            ...customDlGameTitles
         ].filter(Boolean))].sort((a,b) => a.localeCompare(b));
         renderPickers();
         syncGameOfDaySelect();
@@ -1451,6 +1498,69 @@
         }
     };
 
+    function loadDownloadableGamesAdmin() {
+        onValue(ref(db, 'customDownloadableGames'), (snap) => {
+            const data = snap.val() || {};
+            const entries = Object.entries(data);
+            customDlGameTitles = entries.map(([, g]) => (g && g.title) ? String(g.title).trim() : '').filter(Boolean);
+            if (typeof rebuildAdminGameTitles === 'function') rebuildAdminGameTitles();
+            const el = document.getElementById('dlGamesAdminList');
+            if (!el) return;
+            if (!entries.length) {
+                el.innerHTML = '<p style="color:var(--muted);font-size:0.85rem;">No custom downloadable games yet.</p>';
+                return;
+            }
+            el.innerHTML = entries.map(([key, g]) => `
+                <div class="timer-item">
+                    <div class="info">
+                        <div class="title">${g.title || 'Untitled'}</div>
+                        <div class="date">${g.size ? g.size + ' MB · ' : ''}${(g.url || '').slice(0, 42)}${(g.url||'').length>42?'…':''}</div>
+                    </div>
+                    <button class="btn btn-danger" style="padding:8px 14px; font-size:0.65rem;" onclick="deleteDownloadableGame('${key}')">Delete</button>
+                </div>
+            `).join('');
+        });
+    }
+
+    window.addDownloadableGame = async function() {
+        const title = document.getElementById('newDlTitle').value.trim();
+        const url = document.getElementById('newDlUrl').value.trim();
+        const size = document.getElementById('newDlSize').value.trim();
+        const thumb = document.getElementById('newDlThumb').value.trim();
+        if (!title || !url) {
+            showStatus('dlGamesStatus', 'Title and download URL required', false);
+            return;
+        }
+        if (!/^https?:\/\//i.test(url)) {
+            showStatus('dlGamesStatus', 'URL must start with http:// or https://', false);
+            return;
+        }
+        try {
+            await push(ref(db, 'customDownloadableGames'), {
+                title,
+                url,
+                size: size || '?',
+                thumb: thumb || null
+            });
+            document.getElementById('newDlTitle').value = '';
+            document.getElementById('newDlUrl').value = '';
+            document.getElementById('newDlSize').value = '';
+            document.getElementById('newDlThumb').value = '';
+            showStatus('dlGamesStatus', 'Downloadable game added — live on site');
+        } catch (e) {
+            showStatus('dlGamesStatus', 'Error: ' + e.message, false);
+        }
+    };
+
+    window.deleteDownloadableGame = async function(key) {
+        try {
+            await remove(ref(db, 'customDownloadableGames/' + key));
+            showStatus('dlGamesStatus', 'Downloadable game removed');
+        } catch (e) {
+            showStatus('dlGamesStatus', 'Error: ' + e.message, false);
+        }
+    };
+
     function loadDuckHuntAdmin() {
         onValue(ref(db, 'duckHints'), (snap) => {
             const data = snap.val() || {};
@@ -1473,19 +1583,25 @@
             const entries = Object.entries(data);
             const el = document.getElementById('specialDucksAdminList');
             if (!el) return;
-            if (!entries.length) { el.innerHTML = '<p style="color:var(--muted);font-size:0.8rem;">No special ducks.</p>'; return; }
-            el.innerHTML = entries.map(([key, d]) => `
-                <div class="timer-item" style="flex-direction:column;align-items:stretch;gap:8px;">
+            if (!entries.length) { el.innerHTML = '<p style="color:var(--muted);font-size:0.8rem;">No ducks yet.</p>'; return; }
+            el.innerHTML = entries.map(([key, d]) => {
+                const type = d.type || 'special';
+                const expired = type === 'limited' && d.expiresAt && Date.now() > d.expiresAt;
+                return `<div class="timer-item" style="flex-direction:column;align-items:stretch;gap:8px;">
                     <div>
-                        <div class="title">${d.active === false ? '[OFF] ' : ''}${d.title || 'Duck'}</div>
+                        <div class="title">${d.active === false || expired ? '[OFF] ' : ''}[${type.toUpperCase()}] ${d.title || 'Duck'}</div>
                         <div class="date">${(d.description||'').slice(0,60)}</div>
+                        ${d.area ? `<div class="date">Area: ${d.area}</div>` : ''}
                         ${d.prize ? `<div class="date">Prize: ${d.prize}</div>` : ''}
+                        ${d.expiresAt ? `<div class="date">Expires: ${new Date(d.expiresAt).toLocaleString()}${expired?' (expired)':''}</div>` : ''}
+                        <div class="date">Claims: ${d.findCount || 0}</div>
                     </div>
                     <div class="btn-group">
                         <button class="btn btn-secondary" style="padding:6px 12px;font-size:0.65rem;" onclick="toggleSpecialDuck('${key}', ${d.active === false})">${d.active === false ? 'Activate' : 'Deactivate'}</button>
                         <button class="btn btn-danger" style="padding:6px 12px;font-size:0.65rem;" onclick="deleteSpecialDuck('${key}')">Delete</button>
                     </div>
-                </div>`).join('');
+                </div>`;
+            }).join('');
         });
 
         onValue(ref(db, 'duckClaims'), (snap) => {
@@ -1533,14 +1649,70 @@
         const title = document.getElementById('newSpecialDuckTitle').value.trim();
         const description = document.getElementById('newSpecialDuckDesc').value.trim();
         const prize = document.getElementById('newSpecialDuckPrize').value.trim();
+        const type = document.getElementById('newDuckType').value || 'special';
+        const area = document.getElementById('newDuckArea').value.trim();
+        const expRaw = document.getElementById('newDuckExpires').value;
         if (!title) { showStatus('duckHuntStatus', 'Title required', false); return; }
+        if (type === 'limited' && !expRaw) {
+            showStatus('duckHuntStatus', 'Limited ducks need an expiry time', false);
+            return;
+        }
         try {
-            await push(ref(db, 'specialDucks'), { title, description, prize, active: true, ts: Date.now() });
+            const payload = {
+                title, description, prize, area,
+                type, active: true, ts: Date.now(), findCount: 0
+            };
+            if (type === 'limited' && expRaw) payload.expiresAt = new Date(expRaw).getTime();
+            await push(ref(db, 'specialDucks'), payload);
             document.getElementById('newSpecialDuckTitle').value = '';
             document.getElementById('newSpecialDuckDesc').value = '';
             document.getElementById('newSpecialDuckPrize').value = '';
-            showStatus('duckHuntStatus', 'Special duck added');
+            document.getElementById('newDuckArea').value = '';
+            document.getElementById('newDuckExpires').value = '';
+            showStatus('duckHuntStatus', type + ' duck added');
         } catch(e) { showStatus('duckHuntStatus', 'Error: '+e.message, false); }
+    };
+
+    function loadSuggestionsAdmin() {
+        onValue(ref(db, 'gameSuggestions'), (snap) => {
+            const data = snap.val() || {};
+            const entries = Object.entries(data).sort((a,b) => (b[1].ts||0)-(a[1].ts||0));
+            const el = document.getElementById('suggestionsAdminList');
+            if (!el) return;
+            if (!entries.length) {
+                el.innerHTML = '<p style="color:var(--muted);font-size:0.8rem;">No suggestions yet.</p>';
+                return;
+            }
+            el.innerHTML = entries.map(([key, s]) => {
+                const status = s.status || 'new';
+                const color = status === 'done' ? 'var(--neon)' : status === 'ignored' ? 'var(--muted)' : 'var(--gold)';
+                return `<div class="timer-item" style="flex-direction:column;align-items:stretch;gap:8px;">
+                    <div>
+                        <div class="title">${(s.title||'Untitled').replace(/</g,'')}</div>
+                        <div class="date">${s.type || '?'} · by ${(s.name||'Anon')} · ${s.ts ? new Date(s.ts).toLocaleString() : ''} · <span style="color:${color};">${status.toUpperCase()}</span></div>
+                        ${s.link ? `<div class="date"><a href="${s.link}" target="_blank" style="color:var(--ice);">${s.link}</a></div>` : ''}
+                        ${s.note ? `<div style="color:var(--text);font-size:0.85rem;margin-top:4px;">${String(s.note).replace(/</g,'')}</div>` : ''}
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" style="padding:6px 12px;font-size:0.65rem;" onclick="setSuggestionStatus('${key}','done')">Done</button>
+                        <button class="btn btn-secondary" style="padding:6px 12px;font-size:0.65rem;" onclick="setSuggestionStatus('${key}','ignored')">Ignore</button>
+                        <button class="btn btn-danger" style="padding:6px 12px;font-size:0.65rem;" onclick="deleteSuggestion('${key}')">Delete</button>
+                    </div>
+                </div>`;
+            }).join('');
+        });
+    }
+    window.setSuggestionStatus = async function(key, status) {
+        try {
+            await update(ref(db, 'gameSuggestions/' + key), { status });
+            showStatus('suggestionsStatus', 'Marked ' + status);
+        } catch(e) { showStatus('suggestionsStatus', 'Error: '+e.message, false); }
+    };
+    window.deleteSuggestion = async function(key) {
+        try {
+            await remove(ref(db, 'gameSuggestions/' + key));
+            showStatus('suggestionsStatus', 'Deleted');
+        } catch(e) { showStatus('suggestionsStatus', 'Error: '+e.message, false); }
     };
     window.toggleSpecialDuck = async function(key, makeActive) {
         try { await update(ref(db, 'specialDucks/' + key), { active: !!makeActive }); showStatus('duckHuntStatus', makeActive ? 'Activated' : 'Deactivated'); }
